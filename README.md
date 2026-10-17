@@ -26,3 +26,28 @@ Untuk menjalankan aplikasi ini di PC lokal Anda, pastikan **Node.js** dan **Git*
    ```bash
    git clone <URL_REPOSITORY_ANDA>
    cd <NAMA_FOLDER_REPOSITORY>
+
+   Instal dependensi:
+code
+Bash
+npm install
+Jalankan aplikasi:
+code
+Bash
+npm run dev
+Akses aplikasi:
+Buka browser dan arahkan ke http://localhost:3000.
+💡 Tips Penggunaan Lokal
+Anda dapat membuat file jalankan_perpustakaan.bat di folder utama aplikasi dengan konten berikut agar aplikasi lebih mudah dijalankan dengan klik dua kali:
+code
+Batch
+@echo off
+cd /d "%~dp0"
+start http://localhost:3000
+npm run dev
+Dikembangkan untuk efisiensi operasional perpustakaan.
+code
+Code
+---
+
+Setelah menempelkan teks tersebut, klik tombol **Commit new file** di bagian bawah halaman GitHub untuk menyimpan README Anda. Dengan ini, siapapun yang membuka repository Anda akan langsung memahami fungsi dan cara menjalankan aplikasi Anda.
