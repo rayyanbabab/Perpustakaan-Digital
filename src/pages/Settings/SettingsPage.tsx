@@ -36,21 +36,21 @@ export const SettingsPage: React.FC = () => {
   // Form Settings State
   const [formData, setFormData] = useState<SystemSettings>(
     settings || {
-      schoolName: 'SMA NEGERI 3 NGANJUK',
-      address: 'Jl. Bengawan Solo 109 Begadung, Nganjuk, Jawa Timur Kode Pos 64413',
-      phone: '(0358) 321xxx',
-      email: 'perpustakaan@sman3nganjuk.sch.id',
-      headmasterName: 'Dra. Hj. Endang Sulistyowati, M.Pd.',
-      headmasterNip: '196705141992032008',
-      headOfLibrary: 'Budi Santoso, S.Pd., M.A.',
-      headOfLibraryNip: '198204122008011012',
+      schoolName: 'POLITEKNIK ASTRA',
+      address: 'Kawasan Industri Delta Silicon II, Cikarang, Jawa Barat 17550',
+      phone: '(021) 50227888',
+      email: 'perpustakaan@polytechnic.astra.ac.id',
+      headmasterName: 'Direktur Politeknik Astra',
+      headmasterNip: '-',
+      headOfLibrary: 'Rayyan Ammar',
+      headOfLibraryNip: '-',
       loanQuotaSiswa: 3,
       loanQuotaGuru: 5,
       loanDurationDaysSiswa: 7,
       loanDurationDaysGuru: 14,
       finePerDay: 1000,
       maxExtensionsAllowed: 2,
-      receiptFooterMessage: 'Terima kasih telah berkunjung & meminjam di Perpustakaan SMAN 3 Nganjuk.'
+      receiptFooterMessage: 'Terima kasih telah berkunjung & meminjam di Perpustakaan Politeknik Astra.'
     }
   );
 
@@ -288,8 +288,8 @@ export const SettingsPage: React.FC = () => {
   };
 
   const gasScriptCode = `// =========================================================================
-// GOOGLE APPS SCRIPT (GAS) CODE - WIDYA PUSTAKA LIBRARY SYSTEM
-// SMAN 3 NGANJUK
+// GOOGLE APPS SCRIPT (GAS) CODE - ASTRA LIBRARY SYSTEM
+// POLITEKNIK ASTRA
 // =========================================================================
 
 const SPREADSHEET_ID = "${formData.googleSpreadsheetId || '1VlKdmIhyMOIQtdgGu5SebRy4wP216THGt9dMPuQfyOA'}";
@@ -298,7 +298,7 @@ const DRIVE_FOLDER_ID = "${formData.googleDriveFolderId || '1KpUK7yn2CZeTQGKAjdv
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({
     status: "success",
-    message: "Web App Google Apps Script Widya Pustaka SMAN 3 Nganjuk Aktif & Siap!"
+    message: "Web App Google Apps Script Astra Library Politeknik Astra Aktif & Siap!"
   })).setMimeType(ContentService.MimeType.JSON);
 }
 

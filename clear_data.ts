@@ -1,6 +1,7 @@
 import { db } from './server/db.ts';
 
 async function clearData() {
+  await db.init();
   const data = db.getData();
   
   // Clear core collections
@@ -15,8 +16,7 @@ async function clearData() {
   if (data.reservations) data.reservations = [];
   if (data.stockOpnames) data.stockOpnames = [];
   if (data.serials) data.serials = [];
-  if (data.backups) data.backups = [];
-  if (data.digitalCollections) data.digitalCollections = [];
+  if ((data as any).digitalCollections) (data as any).digitalCollections = [];
 
   // Filter users: keep only administrative roles (superadmin, admin, pustakawan, kepala_sekolah)
   const rolesToKeep = ['superadmin', 'admin', 'pustakawan', 'kepala_sekolah'];
@@ -26,8 +26,10 @@ async function clearData() {
   const removedUsersCount = originalUserCount - data.users.length;
 
   db.saveDatabase(data);
+  await db.flushToNeon();
   console.log(`Data cleared successfully.`);
   console.log(`Removed ${removedUsersCount} user accounts (Siswa/Guru). Remaining users: ${data.users.length}`);
+  process.exit(0);
 }
 
 clearData();

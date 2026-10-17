@@ -65,12 +65,12 @@ export const MemberCardPrint: React.FC<MemberCardPrintProps> = ({ member, settin
                 </div>
                 <div>
                   <h4 className="font-extrabold text-xs tracking-wider text-amber-300 uppercase leading-none">
-                    {settings?.schoolName || 'SMA NEGERI 3 NGANJUK'}
+                    {settings?.schoolName || 'POLITEKNIK ASTRA'}
                   </h4>
                   <p className="text-[10px] font-semibold text-slate-200 tracking-wide mt-0.5">
-                    {settings?.libraryName || 'WIDYA PUSTAKA LIBRARY SYSTEM'}
+                    {settings?.libraryName || 'ASTRA LIBRARY SYSTEM'}
                   </p>
-                  <p className="text-[8px] text-slate-400">Jl. Bengawan Solo 109 Begadung, Nganjuk</p>
+                  <p className="text-[8px] text-slate-400">{settings?.address || 'Kawasan Industri Delta Silicon II, Cikarang'}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -143,29 +143,29 @@ export const MemberCardPrint: React.FC<MemberCardPrintProps> = ({ member, settin
             <div>
               <h5 className="font-bold text-amber-400 text-xs uppercase tracking-wide border-b border-slate-800 pb-1.5 flex items-center justify-between">
                 <span>TATA TERTIB PERPUSTAKAAN</span>
-                <span className="text-[9px] text-slate-400 font-normal">SMA Negeri 3 Nganjuk</span>
+                <span className="text-[9px] text-slate-400 font-normal">{settings?.schoolName || 'Politeknik Astra'}</span>
               </h5>
               <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-slate-300 mt-2.5 leading-relaxed">
-                <li>Kartu ini adalah bukti keanggotaan sah Perpustakaan Widya Pustaka SMAN 3 Nganjuk.</li>
+                <li>Kartu ini adalah bukti keanggotaan sah Perpustakaan Astra Library Politeknik Astra.</li>
                 <li>Wajib membawa kartu anggota setiap meminjam, mengembalikan, atau membaca koleksi.</li>
-                <li>Maksimal peminjaman: Siswa 3 buku (7 hari), Guru/Tendik 5 buku (14 hari).</li>
+                <li>Maksimal peminjaman: Mahasiswa 3 buku (7 hari), Dosen/Tendik 5 buku (14 hari).</li>
                 <li>Keterlambatan pengembalian buku dikenakan denda sesuai peraturan yang berlaku.</li>
-                <li>Dilarang merusak, mencoret, melipat, atau menghilangkan buku pustaka sekolah.</li>
+                <li>Dilarang merusak, mencoret, melipat, atau menghilangkan buku koleksi perpustakaan.</li>
                 <li>Apabila kartu ini hilang, segera laporkan ke Meja Sirkulasi Perpustakaan.</li>
               </ol>
             </div>
 
             <div className="border-t border-slate-800 pt-2 flex items-end justify-between text-[9px] text-slate-400">
               <div>
-                <p>Nganjuk, Jawa Timur</p>
-                <p className="font-semibold text-slate-200">Kepala Perpustakaan SMA Negeri 3 Nganjuk</p>
+                <p>{settings?.city || 'Cikarang'}, Jawa Barat</p>
+                <p className="font-semibold text-slate-200">Kepala Perpustakaan Politeknik Astra</p>
                 <p className="text-amber-300 font-medium mt-3">
-                  {settings?.headOfLibrary || 'Dra. Endang Sulistyowati, M.Pd.'}
+                  {settings?.headOfLibrary || 'Rayyan Ammar'}
                 </p>
               </div>
               <div className="text-right">
                 <p className="font-mono text-[8px] text-slate-500">ID: {member.id}</p>
-                <p className="text-amber-400/80 font-bold">WIDYA PUSTAKA</p>
+                <p className="text-amber-400/80 font-bold">{settings?.shortName || 'ASTRA LIBRARY'}</p>
               </div>
             </div>
           </div>

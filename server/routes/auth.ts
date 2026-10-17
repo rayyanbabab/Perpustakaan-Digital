@@ -65,7 +65,7 @@ router.get('/me', authMiddleware, (req: AuthenticatedRequest, res: Response) => 
 router.post('/demo-login', (req: Request, res: Response) => {
   const { role } = req.body;
   const data = db.getData();
-  const user = data.users.find((u) => u.role === role && u.isActive);
+  const user = data.users.find((u) => (u.role === role || u.username === role) && u.isActive);
 
   if (!user) {
     return res.status(404).json({ error: `Pengguna untuk role ${role} tidak ditemukan.` });

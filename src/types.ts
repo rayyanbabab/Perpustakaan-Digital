@@ -160,6 +160,8 @@ export interface Loan {
   memberCode: string;
   memberName: string;
   memberType: MemberType;
+  memberPhone?: string;
+  memberEmail?: string;
   officerId?: string;
   officerName?: string;
   loanDate: string;
@@ -214,6 +216,7 @@ export interface Reservation {
   requestDate?: string;
   reservationDate?: string;
   expiryDate?: string;
+  readyDate?: string;
   status: ReservationStatus;
   allocatedBarcode?: string;
   notes?: string;

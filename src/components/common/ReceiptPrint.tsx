@@ -45,10 +45,10 @@ export const ReceiptPrint: React.FC<ReceiptPrintProps> = ({ type, loan, fine, se
         <div className="print-thermal-receipt bg-white text-slate-900 p-5 rounded-xl border border-slate-200 font-mono text-xs shadow-inner space-y-3 print:border-none print:shadow-none print:m-0 print:p-0">
           {/* School Header */}
           <div className="text-center border-b border-dashed border-slate-300 pb-3">
-            <h4 className="font-bold text-sm uppercase tracking-tight">{settings?.schoolName || 'SMA NEGERI 3 NGANJUK'}</h4>
-            <p className="text-[10px] font-semibold text-slate-700">{settings?.libraryName || 'WIDYA PUSTAKA LIBRARY SYSTEM'}</p>
-            <p className="text-[9px] text-slate-500">{settings?.address || 'Jl. Bengawan Solo 109 Begadung, Nganjuk'}</p>
-            <p className="text-[9px] text-slate-500">{settings?.phone || '(0358) 321855'}</p>
+            <h4 className="font-bold text-sm uppercase tracking-tight">{settings?.schoolName || 'POLITEKNIK ASTRA'}</h4>
+            <p className="text-[10px] font-semibold text-slate-700">{settings?.libraryName || 'ASTRA LIBRARY SYSTEM'}</p>
+            <p className="text-[9px] text-slate-500">{settings?.address || 'Kawasan Industri Delta Silicon II, Cikarang'}</p>
+            <p className="text-[9px] text-slate-500">{settings?.phone || '(021) 50227888'}</p>
           </div>
 
           {/* Transaction Meta */}

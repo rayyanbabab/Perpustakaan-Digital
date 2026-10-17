@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  Sparkles,
   Layers,
   BookOpen,
   Trash2

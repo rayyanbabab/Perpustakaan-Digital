@@ -243,7 +243,7 @@ export const SingleStatusModal: React.FC<SingleStatusModalProps> = ({
                     Nonaktif (Lulus / Alumni)
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
-                    Telah menamatkan pendidikan di SMA Negeri 3 Nganjuk
+                    Telah menamatkan pendidikan di Politeknik Astra
                   </div>
                 </div>
               </label>

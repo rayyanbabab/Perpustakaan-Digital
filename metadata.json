@@ -1,6 +1,6 @@
 {
-  "name": "WIDYA PUSTAKA LIBRARY SYSTEM",
-  "description": "Sistem Manajemen Perpustakaan Terpadu SMA Negeri 3 Nganjuk - OPAC, Sirkulasi Barcode, Keanggotaan, Denda, Stock Opname, dan Laporan.",
+  "name": "ASTRA LIBRARY SYSTEM",
+  "description": "Sistem Manajemen Perpustakaan Terpadu Politeknik Astra - OPAC, Sirkulasi Barcode, Keanggotaan, Denda, Stock Opname, dan Laporan.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

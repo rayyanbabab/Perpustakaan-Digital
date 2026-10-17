@@ -71,7 +71,7 @@ export const ExportDropdown = <T extends any>({
       filename,
       sheetName: sheetName || filenamePrefix.slice(0, 25),
       title: title || `Ekspor Data ${filenamePrefix}`,
-      subtitle: subtitle || `Diekspor dari Widya Pustaka SMAN 3 Nganjuk - Total: ${data.length} data`,
+      subtitle: subtitle || `Diekspor dari Astra Library Politeknik Astra - Total: ${data.length} data`,
       columns
     });
     if (res) {

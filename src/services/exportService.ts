@@ -1,7 +1,7 @@
 /**
  * Export Utility Service
  * Provides centralized, localized CSV and Excel (.xls/XML) export capabilities
- * for Widya Pustaka Library Management System.
+ * for Astra Library Management System.
  */
 
 export interface ExportColumn<T = any> {
@@ -21,7 +21,7 @@ export interface ExportOptions<T = any> {
 }
 
 /**
- * Standard Localized Column Dictionaries for Tables in Widya Pustaka
+ * Standard Localized Column Dictionaries for Tables in Astra Library
  */
 export const LOCALIZED_COLUMNS = {
   books: [
@@ -223,8 +223,8 @@ export function exportToExcel<T = any>(data: T[], options: ExportOptions<T> = {}
 
   const columns = options.columns || inferColumns(data);
   const sheetName = options.sheetName || 'Data Perpustakaan';
-  const title = options.title || 'Laporan Data Sistem Widya Pustaka';
-  const subtitle = options.subtitle || `Diekspor pada: ${new Date().toLocaleString('id-ID')} | SMA Negeri 3 Nganjuk`;
+  const title = options.title || 'Laporan Data Sistem Astra Library';
+  const subtitle = options.subtitle || `Diekspor pada: ${new Date().toLocaleString('id-ID')} | Politeknik Astra`;
   const filename = options.filename || `export_${new Date().toISOString().slice(0, 10)}.xls`;
 
   // Build Excel Table HTML

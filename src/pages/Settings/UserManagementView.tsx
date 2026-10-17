@@ -9,7 +9,6 @@ import {
   Key,
   Trash2,
   Edit,
-  Sparkles,
   Search,
   Filter,
   CheckCircle2,
@@ -546,7 +545,7 @@ export const UserManagementView: React.FC = () => {
             Manajemen Pengguna Sistem
           </h1>
           <p className="text-xs sm:text-sm text-blue-100 max-w-2xl leading-relaxed">
-            Kelola seluruh akun staf perpustakaan, guru, dan otomatisasi pembuatan user login bagi seluruh siswa SMA Negeri 3 Nganjuk.
+            Kelola seluruh akun staf perpustakaan, dosen, dan otomatisasi pembuatan user login bagi seluruh mahasiswa Politeknik Astra.
           </p>
         </div>
 
@@ -555,13 +554,13 @@ export const UserManagementView: React.FC = () => {
           {isSuperadmin && (
             <button
               onClick={handleOpenAutoGenerate}
-              className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white rounded-xl text-xs font-black flex items-center gap-2 transition-all shadow-lg shadow-emerald-950/40 border border-emerald-400/30"
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-xs"
               title="Buat akun login secara otomatis untuk seluruh siswa"
             >
-              <Sparkles className="w-4 h-4 text-amber-200" />
+              <UserPlus className="w-4 h-4 text-white" />
               <span>Buat Akun Siswa Otomatis</span>
               {stats.unregisteredStudentsCount > 0 && (
-                <span className="px-2 py-0.5 bg-amber-400 text-slate-900 rounded-full text-[10px] font-black animate-pulse">
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-900 rounded-full text-[10px] font-bold">
                   {stats.unregisteredStudentsCount} Belum Ada Akun
                 </span>
               )}
@@ -583,10 +582,10 @@ export const UserManagementView: React.FC = () => {
           <ExportDropdown
             data={usersList}
             columns={LOCALIZED_COLUMNS.users}
-            filenamePrefix="data_pengguna_sistem_sman3nganjuk"
+            filenamePrefix="data_pengguna_sistem_politeknik_astra"
             sheetName="Pengguna Sistem"
-            title="Daftar Pengguna Sistem Perpustakaan Widya Pustaka"
-            subtitle="SMA Negeri 3 Nganjuk"
+            title="Daftar Pengguna Sistem Perpustakaan Astra Library"
+            subtitle="Politeknik Astra"
             label="Export User"
           />
         </div>
@@ -638,7 +637,7 @@ export const UserManagementView: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold">
             <span>Siswa Belum Punya Akun</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <UserPlus className="w-4 h-4 text-slate-400" />
           </div>
           <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
             {stats.unregisteredStudentsCount}
@@ -1479,15 +1478,15 @@ export const UserManagementView: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
-                  <Sparkles className="w-5 h-5 text-amber-200" />
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                  <UserPlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 dark:text-white text-base">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
                     Pembuatan Akun User Otomatis Bagi Seluruh Siswa
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Otomatisasi akun login OPAC dan Portal Pemustaka untuk seluruh siswa SMAN 3 Nganjuk
+                    Otomatisasi akun login OPAC dan Portal Pemustaka untuk seluruh siswa Politeknik Astra
                   </p>
                 </div>
               </div>
@@ -1702,9 +1701,9 @@ export const UserManagementView: React.FC = () => {
                 type="button"
                 onClick={handleExecuteAutoGenerate}
                 disabled={generating}
-                className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95 disabled:opacity-50"
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors disabled:opacity-50"
               >
-                <Sparkles className="w-4 h-4 text-amber-200" />
+                <UserPlus className="w-4 h-4 text-white" />
                 {generating ? 'Sedang Memproses Akun Siswa...' : `Mulai Pembuatan Akun Siswa`}
               </button>
             </div>
@@ -1824,11 +1823,11 @@ export const UserManagementView: React.FC = () => {
               <ExportDropdown
                 data={generationResults.generatedList}
                 columns={LOCALIZED_COLUMNS.studentAccounts}
-                filenamePrefix="rekap_akun_siswa_login_perpustakaan"
-                sheetName="Akun Siswa Login"
-                title="Daftar Akun & Kredensial Login Siswa Perpustakaan SMAN 3 Nganjuk"
-                subtitle="Widya Pustaka Library System"
-                label="Unduh Rekap Akun Siswa (Excel/CSV)"
+                filenamePrefix="rekap_akun_mahasiswa_login_perpustakaan"
+                sheetName="Akun Mahasiswa Login"
+                title="Daftar Akun & Kredensial Login Mahasiswa Perpustakaan Politeknik Astra"
+                subtitle="Astra Library System"
+                label="Unduh Rekap Akun Mahasiswa (Excel/CSV)"
               />
 
               <button

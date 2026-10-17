@@ -22,7 +22,6 @@ import {
   Square,
   CheckCircle2,
   Layers,
-  Sparkles,
   AlertCircle
 } from 'lucide-react';
 import { MemberCardPrint } from '../../components/common/MemberCardPrint';
@@ -302,7 +301,7 @@ export const MemberList: React.FC = () => {
             Direktori Data Siswa & Guru
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Kelola data pemustaka, filter tingkat kelas & rombel, status kelulusan, dan mutasi siswa SMA Negeri 3 Nganjuk.
+            Kelola data pemustaka, filter program studi & angkatan, status kelulusan, dan mutasi mahasiswa Politeknik Astra.
           </p>
         </div>
 
@@ -310,10 +309,10 @@ export const MemberList: React.FC = () => {
           <ExportDropdown
             data={members}
             columns={LOCALIZED_COLUMNS.members}
-            filenamePrefix="data_siswa_perpustakaan"
+            filenamePrefix="data_anggota_perpustakaan"
             sheetName="Daftar Anggota"
-            title="Direktori Data Siswa & Anggota Perpustakaan SMAN 3 Nganjuk"
-            subtitle={`Widya Pustaka - Total: ${members.length} anggota`}
+            title="Direktori Data Pemustaka Perpustakaan Politeknik Astra"
+            subtitle={`Astra Library - Total: ${members.length} anggota`}
             label="Ekspor Excel / CSV"
           />
 

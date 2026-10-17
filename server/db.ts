@@ -20,6 +20,7 @@ import {
   MasterPublisher,
   MasterAuthor
 } from '../src/types';
+import { initNeonTables, fetchAllFromNeon, pushAllToNeon } from './neonSync';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'library_db.json');
@@ -45,19 +46,19 @@ export interface DatabaseSchema {
 
 // Initial default settings
 const defaultSettings: LibrarySettings = {
-  libraryName: 'WIDYA PUSTAKA LIBRARY SYSTEM',
-  shortName: 'WIDYA PUSTAKA',
-  schoolName: 'SMA NEGERI 3 NGANJUK',
-  address: 'Jl. Bengawan Solo 109 Begadung',
-  city: 'Nganjuk',
-  postalCode: '64413',
-  province: 'Jawa Timur',
-  phone: '(0358) 321855',
-  email: 'perpustakaan@sman3nganjuk.sch.id',
-  website: 'https://sman3nganjuk.sch.id',
+  libraryName: 'ASTRA LIBRARY SYSTEM',
+  shortName: 'ASTRA LIBRARY',
+  schoolName: 'POLITEKNIK ASTRA',
+  address: 'Kawasan Industri Delta Silicon II, Cikarang',
+  city: 'Bekasi',
+  postalCode: '17550',
+  province: 'Jawa Barat',
+  phone: '(021) 50227888',
+  email: 'perpustakaan@polytechnic.astra.ac.id',
+  website: 'https://polytechnic.astra.ac.id',
   tagline: 'Membaca, Mengelola, Menginspirasi',
-  headOfLibrary: 'Dra. Endang Sulistyowati, M.Pd.',
-  headmaster: 'Drs. H. Sukadi, M.Pd.',
+  headOfLibrary: 'Rayyan Ammar',
+  headmaster: 'Direktur Politeknik Astra',
   finePerDay: 1000,
   gracePeriodDays: 1,
   fineDamagedPercent: 50,
@@ -918,15 +919,150 @@ function getSeedData(): DatabaseSchema {
 
 class DatabaseService {
   private data: DatabaseSchema;
+  private isNeonEnabled: boolean = false;
+  private syncTimeout: NodeJS.Timeout | null = null;
+  private isSyncingToNeon: boolean = false;
+  private pendingSyncToNeon: boolean = false;
 
   constructor() {
     this.ensureDirectoryExists();
     this.data = this.loadDatabase();
+    this.ensureStudentAndCatalogData();
+  }
+
+  public async init(): Promise<void> {
+    if (!process.env.DATABASE_URL) {
+      console.log('[DATABASE] No DATABASE_URL configured. Running with local JSON database.');
+      return;
+    }
+
+    try {
+      console.log('[NEON POSTGRES] Initializing Neon connection...');
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Neon connection timed out')), 2000)
+      );
+      await Promise.race([initNeonTables(), timeoutPromise]);
+      const neonData = (await Promise.race([fetchAllFromNeon(), timeoutPromise])) as any;
+
+      if (neonData && neonData.users && neonData.users.length > 0) {
+        console.log(`[NEON POSTGRES] Synced data from Neon (${neonData.users.length} users, ${neonData.books.length} books, ${neonData.categories.length} categories).`);
+        this.data = neonData;
+        this.ensureStudentAndCatalogData();
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+        } catch {}
+      } else {
+        console.log('[NEON POSTGRES] Neon database is fresh/empty. Migrating initial data to Neon...');
+        this.ensureStudentAndCatalogData();
+        await pushAllToNeon(this.data);
+        console.log('[NEON POSTGRES] Initial data successfully migrated to Neon PostgreSQL!');
+      }
+
+      this.isNeonEnabled = true;
+      console.log('[NEON POSTGRES] Neon PostgreSQL is connected and active.');
+    } catch (err) {
+      console.error('[NEON POSTGRES] Failed to connect to Neon PostgreSQL. Continuing with local JSON file:', err);
+      this.isNeonEnabled = false;
+    }
+  }
+
+  public ensureStudentAndCatalogData(): void {
+    let changed = false;
+    const studentHash = bcrypt.hashSync('siswa123', 10);
+
+    // 1. Ensure student user account 'siswa'
+    let studentUser = this.data.users.find((u) => u.username === 'siswa');
+    if (!studentUser) {
+      studentUser = {
+        id: 'usr-siswa',
+        username: 'siswa',
+        email: 'siswa@polytechnic.astra.ac.id',
+        fullName: 'Dimas Arya Pratama (Mahasiswa)',
+        name: 'Dimas Arya Pratama',
+        role: 'siswa',
+        passwordHash: studentHash,
+        memberId: 'mem-siswa-001',
+        avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+        isActive: true,
+        createdAt: '2025-01-06T08:00:00Z'
+      };
+      this.data.users.push(studentUser);
+      changed = true;
+    }
+
+    // Also support username 'siswa1'
+    if (!this.data.users.some((u) => u.username === 'siswa1')) {
+      this.data.users.push({
+        id: 'usr-siswa1',
+        username: 'siswa1',
+        email: 'dimas.pratama@siswa.astra.ac.id',
+        fullName: 'Dimas Arya Pratama',
+        name: 'Dimas Arya Pratama',
+        role: 'siswa',
+        passwordHash: studentHash,
+        memberId: 'mem-siswa-001',
+        avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+        isActive: true,
+        createdAt: '2025-01-06T08:00:00Z'
+      });
+      changed = true;
+    }
+
+    // 2. Ensure member record for student
+    let studentMember = this.data.members.find((m) => m.id === 'mem-siswa-001' || m.memberCode === '202410101');
+    if (!studentMember) {
+      this.data.members.push({
+        id: 'mem-siswa-001',
+        memberCode: '202410101',
+        type: 'SISWA',
+        identityNumber: '202410101',
+        nisn: '0067891234',
+        name: 'Dimas Arya Pratama',
+        gender: 'L',
+        classGrade: 'Tingkat 2 (Teknik Manufaktur)',
+        major: 'Teknik Rekayasa Pembuatan Perkakas Presisi',
+        entryYear: 2024,
+        phone: '081234567890',
+        email: 'siswa@polytechnic.astra.ac.id',
+        address: 'Kawasan Industri Delta Silicon II, Cikarang',
+        photoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+        status: 'active',
+        registeredDate: '2024-08-01',
+        expiryDate: '2027-08-01',
+        notes: 'Mahasiswa aktif Politeknik Astra'
+      });
+      changed = true;
+    }
+
+    // 3. Ensure rich catalog books exist if books length is small (< 3)
+    if (!this.data.books || this.data.books.length < 3) {
+      const seed = getSeedData();
+      for (const b of seed.books) {
+        if (!this.data.books.some((existing) => existing.id === b.id)) {
+          this.data.books.push(b);
+          changed = true;
+        }
+      }
+      for (const itm of seed.items) {
+        if (!this.data.items.some((existing) => existing.id === itm.id || existing.barcode === itm.barcode)) {
+          this.data.items.push(itm);
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      this.saveDatabase();
+    }
   }
 
   private ensureDirectoryExists() {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+    } catch {
+      // Ignored in read-only environment like Vercel Serverless
     }
   }
 
@@ -954,6 +1090,42 @@ class DatabaseService {
     } catch (e) {
       console.error('Error saving library database file:', e);
     }
+
+    if (this.isNeonEnabled) {
+      this.scheduleNeonSync();
+      // Ensure sync also triggers immediately in serverless environment
+      this.flushToNeon().catch(() => {});
+    }
+  }
+
+  private scheduleNeonSync() {
+    if (this.syncTimeout) {
+      clearTimeout(this.syncTimeout);
+    }
+    this.syncTimeout = setTimeout(() => {
+      this.flushToNeon();
+    }, 250);
+  }
+
+  public async flushToNeon(): Promise<void> {
+    if (!this.isNeonEnabled) return;
+    if (this.isSyncingToNeon) {
+      this.pendingSyncToNeon = true;
+      return;
+    }
+
+    this.isSyncingToNeon = true;
+    try {
+      await pushAllToNeon(this.data);
+    } catch (e) {
+      console.error('[NEON POSTGRES] Background sync to Neon failed:', e);
+    } finally {
+      this.isSyncingToNeon = false;
+      if (this.pendingSyncToNeon) {
+        this.pendingSyncToNeon = false;
+        this.scheduleNeonSync();
+      }
+    }
   }
 
   public getData(): DatabaseSchema {
@@ -975,31 +1147,37 @@ class DatabaseService {
     return newLog;
   }
 
-  // Synchronize overdue loans and fine calculation
+  // Synchronize overdue loans, fine calculation, and expired reservations
   public syncOverdueLoans() {
     const today = new Date().toISOString().split('T')[0];
+    const todayMidnight = new Date(today + 'T00:00:00Z').getTime();
     let changed = false;
 
+    // 1. Process overdue loans and fines
     this.data.loans.forEach((loan) => {
       if (loan.status === 'active' && loan.dueDate < today) {
         loan.status = 'overdue';
         changed = true;
+      }
 
-        // Calculate fine if fine does not exist
+      if (loan.status === 'overdue' || (loan.status === 'active' && loan.dueDate < today)) {
+        const dueMidnight = new Date(loan.dueDate.slice(0, 10) + 'T00:00:00Z').getTime();
+        const daysLate = Math.max(0, Math.floor((todayMidnight - dueMidnight) / (1000 * 60 * 60 * 24)));
+        const gracePeriod = this.data.settings.gracePeriodDays || 0;
+
         loan.items.forEach((item) => {
           const existingFine = this.data.fines.find(
             (f) => f.loanId === loan.id && f.itemId === item.itemId && f.status !== 'paid' && f.status !== 'waived'
           );
-          const daysLate = Math.max(
-            0,
-            Math.ceil((new Date(today).getTime() - new Date(loan.dueDate).getTime()) / (1000 * 60 * 60 * 24))
-          );
 
-          if (daysLate > 0) {
-            const fineAmount = daysLate * this.data.settings.finePerDay;
+          if (daysLate > gracePeriod) {
+            const fineAmount = daysLate * (this.data.settings.finePerDay || 1000);
             if (existingFine) {
-              existingFine.daysLate = daysLate;
-              existingFine.totalFine = fineAmount;
+              if (existingFine.daysLate !== daysLate || existingFine.totalFine !== fineAmount) {
+                existingFine.daysLate = daysLate;
+                existingFine.totalFine = fineAmount;
+                changed = true;
+              }
             } else {
               this.data.fines.push({
                 id: 'fn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
@@ -1012,7 +1190,7 @@ class DatabaseService {
                 bookTitle: item.bookTitle,
                 barcode: item.barcode,
                 daysLate,
-                finePerDay: this.data.settings.finePerDay,
+                finePerDay: this.data.settings.finePerDay || 1000,
                 damageFine: 0,
                 lostFine: 0,
                 totalFine: fineAmount,
@@ -1024,11 +1202,41 @@ class DatabaseService {
                 createdAt: new Date().toISOString(),
                 notes: 'Otomatis dihitung sistem'
               });
+              changed = true;
             }
           }
         });
       }
     });
+
+    // 2. Process expired reservations and reallocate or release items
+    if (this.data.reservations && this.data.reservations.length > 0) {
+      this.data.reservations.forEach((resv) => {
+        if ((resv.status === 'ready' || resv.status === 'pending' || resv.status === 'waiting') && resv.expiryDate && resv.expiryDate < today) {
+          resv.status = 'expired';
+          changed = true;
+
+          // If reservation had an allocated barcode, release or pass to next waiting patron
+          if (resv.allocatedBarcode) {
+            const item = this.data.items.find((i) => i.barcode === resv.allocatedBarcode);
+            if (item && item.status === 'reserved') {
+              const nextResv = this.data.reservations
+                .filter((r) => r.id !== resv.id && r.bookId === resv.bookId && (r.status === 'pending' || r.status === 'waiting'))
+                .sort((a, b) => new Date(a.requestDate || a.reservationDate || 0).getTime() - new Date(b.requestDate || b.reservationDate || 0).getTime())[0];
+
+              if (nextResv) {
+                nextResv.status = 'ready';
+                nextResv.allocatedBarcode = item.barcode;
+                nextResv.readyDate = today;
+              } else {
+                item.status = 'available';
+              }
+            }
+            resv.allocatedBarcode = undefined;
+          }
+        }
+      });
+    }
 
     if (changed) {
       this.saveDatabase();

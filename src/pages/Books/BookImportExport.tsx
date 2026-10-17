@@ -11,7 +11,7 @@ import {
   HelpCircle,
   Trash2,
   RefreshCw,
-  Sparkles,
+  FileCheck,
   Layers,
   BookOpen
 } from 'lucide-react';
@@ -170,7 +170,7 @@ Dasar-Dasar Pemrograman Python untuk Pemula\tJubilee Enterprise\t978-623-00-2415
             Import Koleksi Bibliografi Buku (Excel)
           </h1>
           <p className="text-xs sm:text-sm text-blue-100 max-w-2xl leading-relaxed">
-            Daftarkan ratusan judul buku pelajaran, fiksi, dan referensi sekaligus dengan mengunggah template Excel resmi Widya Pustaka SMAN 3 Nganjuk.
+            Daftarkan ratusan judul buku teks, vokasi, teknik, dan referensi sekaligus dengan mengunggah template Excel resmi Astra Library Politeknik Astra.
           </p>
         </div>
 
@@ -187,10 +187,10 @@ Dasar-Dasar Pemrograman Python untuk Pemula\tJubilee Enterprise\t978-623-00-2415
           <ExportDropdown
             data={allBooksForExport}
             columns={LOCALIZED_COLUMNS.books}
-            filenamePrefix="katalog_seluruh_buku_sman3nganjuk"
+            filenamePrefix="katalog_seluruh_buku_politeknik_astra"
             sheetName="Katalog Buku"
-            title="Katalog Bibliografi Perpustakaan SMA Negeri 3 Nganjuk"
-            subtitle="Widya Pustaka - Data Koleksi Aktif"
+            title="Katalog Bibliografi Perpustakaan Politeknik Astra"
+            subtitle="Astra Library - Data Koleksi Aktif"
             label="Export Data Buku"
           />
         </div>
@@ -273,7 +273,7 @@ Dasar-Dasar Pemrograman Python untuk Pemula\tJubilee Enterprise\t978-623-00-2415
                 className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
                 title="Muat 5 contoh data buku"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <FileText className="w-3.5 h-3.5 text-blue-600" />
                 Contoh Data
               </button>
             </div>

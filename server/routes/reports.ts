@@ -28,6 +28,8 @@ router.get('/dashboard-stats', (req: Request, res: Response) => {
   const overdueLoans = data.loans.filter((l) => l.status === 'overdue');
   const loansToday = data.loans.filter((l) => l.loanDate === today).length;
   const returnsToday = data.loans.filter((l) => l.returnDate === today).length;
+  const visitors = (data as any).visitors || (data as any).visitorLogs || [];
+  const visitorsToday = visitors.filter((v: any) => (v.visitDate || '').startsWith(today)).length;
 
   const totalFinesCollected = data.fines
     .filter((f) => f.status === 'paid' || f.status === 'partial')
@@ -126,6 +128,7 @@ router.get('/dashboard-stats', (req: Request, res: Response) => {
       overdueLoansCount: overdueLoans.length,
       loansToday,
       returnsToday,
+      visitorsToday,
       totalFinesCollected,
       totalUnpaidFines
     },
@@ -326,7 +329,7 @@ router.get('/recap', (req: Request, res: Response) => {
       indicator: 'Total Transaksi Sirkulasi Peminjaman',
       value: totalLoans,
       unit: 'Transaksi',
-      notes: 'Tercatat dalam sistem otomasi Widya Pustaka'
+      notes: 'Tercatat dalam sistem otomasi Astra Library'
     },
     {
       indicator: 'Peminjaman Aktif Berjalan',

@@ -12,12 +12,16 @@ import stockOpnameRoutes from './server/routes/stockOpname';
 import reportRoutes from './server/routes/reports';
 import settingsRoutes from './server/routes/settings';
 import aiRoutes from './server/routes/ai';
+import { db } from './server/db';
 
 dotenv.config();
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Initialize Database (Neon PostgreSQL / Local sync)
+  await db.init();
 
   // Middleware
   app.use(cors());
@@ -38,7 +42,7 @@ async function startServer() {
   app.get('/api/health', (req, res) => {
     res.json({
       status: 'ok',
-      service: 'Widya Pustaka Library System - SMAN 3 Nganjuk',
+      service: 'Astra Library System - Politeknik Astra',
       version: '1.0.0',
       timestamp: new Date().toISOString()
     });
@@ -60,7 +64,9 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[WIDYA PUSTAKA] Server running on http://0.0.0.0:${PORT}`);
+    console.log(`\n  📚 ASTRA LIBRARY SYSTEM - POLITEKNIK ASTRA`);
+    console.log(`  ➜  Local:   http://localhost:${PORT}/`);
+    console.log(`  ➜  Network: http://127.0.0.1:${PORT}/\n`);
   });
 }
 

@@ -11,9 +11,11 @@ import {
   Printer,
   Calendar,
   User,
-  BookOpen
+  BookOpen,
+  MessageCircle
 } from 'lucide-react';
 import { ReceiptPrint } from '../../components/common/ReceiptPrint';
+import { WhatsAppReminderModal } from '../../components/common/WhatsAppReminderModal';
 
 export const ActiveLoans: React.FC = () => {
   const { user, settings } = useAuth();
@@ -23,6 +25,7 @@ export const ActiveLoans: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'active' | 'overdue'>('all');
   const [search, setSearch] = useState('');
   const [selectedLoanForReceipt, setSelectedLoanForReceipt] = useState<Loan | null>(null);
+  const [selectedLoanForWa, setSelectedLoanForWa] = useState<Loan | null>(null);
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -67,6 +70,8 @@ export const ActiveLoans: React.FC = () => {
     }
   };
 
+  const overdueCount = loans.filter((l) => l.status === 'overdue').length;
+
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -74,10 +79,12 @@ export const ActiveLoans: React.FC = () => {
         <div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
             <Clock className="w-6 h-6 text-blue-600" />
-            Daftar Peminjaman Aktif & Jatuh Tempo
+            {user?.role === 'siswa' ? 'Peminjaman Aktif Saya' : 'Daftar Peminjaman Aktif & Jatuh Tempo'}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Monitoring sirkulasi buku yang sedang dipinjam siswa dan guru SMA Negeri 3 Nganjuk.
+            {user?.role === 'siswa'
+              ? 'Daftar buku yang sedang Anda pinjam. Harap kembalikan buku sebelum tanggal jatuh tempo.'
+              : 'Monitoring sirkulasi buku yang sedang dipinjam mahasiswa dan dosen Politeknik Astra.'}
           </p>
         </div>
 
@@ -101,11 +108,16 @@ export const ActiveLoans: React.FC = () => {
           </button>
           <button
             onClick={() => setFilter('overdue')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 ${
               filter === 'overdue' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-500'
             }`}
           >
-            Terlambat (Overdue)
+            <span>Terlambat</span>
+            {overdueCount > 0 && (
+              <span className="px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-bold">
+                {overdueCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -187,6 +199,22 @@ export const ActiveLoans: React.FC = () => {
                       </span>
                     </td>
                     <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                      {/* WhatsApp Reminder Button (Librarian/Staff only) */}
+                      {['superadmin', 'admin', 'pustakawan'].includes(user?.role || '') && (
+                        <button
+                          onClick={() => setSelectedLoanForWa(loan)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1 shadow-2xs ${
+                            loan.status === 'overdue'
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800'
+                          }`}
+                          title="Kirim Pesan WhatsApp Pengingat"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>Ingatkan WA</span>
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleExtend(loan.id)}
                         disabled={loan.extensionCount >= (settings?.maxExtensionsAllowed || 2) || loan.status === 'overdue'}
@@ -211,6 +239,16 @@ export const ActiveLoans: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* WhatsApp Reminder Modal */}
+      {selectedLoanForWa && (
+        <WhatsAppReminderModal
+          isOpen={!!selectedLoanForWa}
+          loan={selectedLoanForWa}
+          settings={settings}
+          onClose={() => setSelectedLoanForWa(null)}
+        />
+      )}
 
       {/* Receipt Modal */}
       {selectedLoanForReceipt && (

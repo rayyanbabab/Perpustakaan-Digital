@@ -57,7 +57,7 @@ export interface ParsedMemberRow {
  */
 export async function downloadBookImportExcelTemplate(): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Widya Pustaka SMAN 3 Nganjuk';
+  workbook.creator = 'Astra Library Politeknik Astra';
   workbook.created = new Date();
 
   // 1. DATA SHEET
@@ -262,7 +262,7 @@ export async function downloadBookImportExcelTemplate(): Promise<void> {
  */
 export async function downloadLoanImportExcelTemplate(): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Widya Pustaka SMAN 3 Nganjuk';
+  workbook.creator = 'Astra Library Politeknik Astra';
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet('Template Impor Peminjaman');
@@ -300,7 +300,7 @@ export async function downloadLoanImportExcelTemplate(): Promise<void> {
  */
 export async function downloadMemberImportExcelTemplate(): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Widya Pustaka SMAN 3 Nganjuk';
+  workbook.creator = 'Astra Library Politeknik Astra';
   workbook.created = new Date();
 
   // 1. DATA SHEET

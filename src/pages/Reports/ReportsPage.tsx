@@ -118,7 +118,7 @@ export const ReportsPage: React.FC = () => {
             filenamePrefix={`laporan_${reportType}_${startDate}_sd_${endDate}`}
             sheetName={`Laporan ${reportType}`}
             title={`Laporan Perpustakaan: ${reportType.toUpperCase()}`}
-            subtitle={`Periode: ${startDate} s/d ${endDate} | SMA Negeri 3 Nganjuk`}
+            subtitle={`Periode: ${startDate} s/d ${endDate} | Politeknik Astra`}
             label="Ekspor Laporan"
           />
 
@@ -239,17 +239,17 @@ export const ReportsPage: React.FC = () => {
             />
             <div className="text-center">
               <h4 className="text-xs font-bold tracking-widest text-slate-600 uppercase">
-                PEMERINTAH PROVINSI JAWA TIMUR · DINAS PENDIDIKAN
+                YAYASAN ASTRA BINA ILMU
               </h4>
               <h2 className="text-lg sm:text-xl font-black text-slate-950 uppercase tracking-tight">
-                {settings?.schoolName || 'SMA NEGERI 3 NGANJUK'}
+                {settings?.schoolName || 'POLITEKNIK ASTRA'}
               </h2>
               <h3 className="text-xs font-black text-blue-900 uppercase">
-                UNIT PERPUSTAKAAN "WIDYA PUSTAKA"
+                UNIT PERPUSTAKAAN "{settings?.shortName || 'ASTRA LIBRARY'}"
               </h3>
               <p className="text-[10px] text-slate-500 font-serif">
-                {settings?.address || 'Jl. Bengawan Solo 109 Begadung, Nganjuk, Jawa Timur Kode Pos 64413'} · Telp:{' '}
-                {settings?.phone || '(0358) 321xxx'} · Email: {settings?.email || 'perpustakaan@sman3nganjuk.sch.id'}
+                {settings?.address || 'Kawasan Industri Delta Silicon II, Cikarang'} · Telp:{' '}
+                {settings?.phone || '(021) 50227888'} · Email: {settings?.email || 'perpustakaan@polytechnic.astra.ac.id'}
               </p>
             </div>
           </div>
@@ -420,18 +420,18 @@ export const ReportsPage: React.FC = () => {
           <div className="space-y-16">
             <p>
               Mengetahui,<br />
-              <strong>Kepala SMA Negeri 3 Nganjuk</strong>
+              <strong>Direktur Politeknik Astra</strong>
             </p>
             <div>
-              <p className="font-bold underline">{settings?.headmasterName || 'Dra. Hj. Endang Sulistyowati, M.Pd.'}</p>
-              <p className="text-[10px] text-slate-500 font-mono">NIP. {settings?.headmasterNip || '196705141992032008'}</p>
+              <p className="font-bold underline">{settings?.headmasterName || 'Direktur Politeknik Astra'}</p>
+              <p className="text-[10px] text-slate-500 font-mono">NIP. {settings?.headmasterNip || '-'}</p>
             </div>
           </div>
 
           <div className="space-y-16">
             <p>
-              Nganjuk, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br />
-              <strong>Kepala Perpustakaan Widya Pustaka</strong>
+              {settings?.city || 'Cikarang'}, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br />
+              <strong>Kepala Perpustakaan Astra Library</strong>
             </p>
             <div>
               <p className="font-bold underline">{settings?.headOfLibrary || 'Budi Santoso, S.Pd., M.A.'}</p>

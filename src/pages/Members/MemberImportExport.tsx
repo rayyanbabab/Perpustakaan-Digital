@@ -9,7 +9,6 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Trash2,
-  Sparkles,
   Users,
   Layers,
   UserCheck
@@ -171,7 +170,7 @@ Bambang Eko Santoso, S.Kom.\tTENDIK\t198902142019031008\tL\t\tLaboran IT & Tekni
             Import Anggota Siswa, Guru & Tendik (Excel)
           </h1>
           <p className="text-xs sm:text-sm text-emerald-100 max-w-2xl leading-relaxed">
-            Daftarkan seluruh siswa per kelas atau dewan guru dan tenaga kependidikan secara massal ke dalam database perpustakaan SMA Negeri 3 Nganjuk.
+            Daftarkan seluruh mahasiswa per program studi atau dewan dosen dan tenaga kependidikan secara massal ke dalam database perpustakaan Politeknik Astra.
           </p>
         </div>
 
@@ -188,10 +187,10 @@ Bambang Eko Santoso, S.Kom.\tTENDIK\t198902142019031008\tL\t\tLaboran IT & Tekni
           <ExportDropdown
             data={allMembersForExport}
             columns={LOCALIZED_COLUMNS.members}
-            filenamePrefix="data_seluruh_anggota_sman3nganjuk"
+            filenamePrefix="data_seluruh_anggota_politeknik_astra"
             sheetName="Data Anggota"
-            title="Direktori Anggota Perpustakaan SMA Negeri 3 Nganjuk"
-            subtitle="Widya Pustaka - Siswa, Guru & Tendik"
+            title="Direktori Anggota Perpustakaan Politeknik Astra"
+            subtitle="Astra Library - Mahasiswa, Dosen & Tendik"
             label="Export Data Anggota"
           />
         </div>
@@ -273,7 +272,7 @@ Bambang Eko Santoso, S.Kom.\tTENDIK\t198902142019031008\tL\t\tLaboran IT & Tekni
                 className="text-xs text-teal-700 dark:text-teal-400 font-semibold hover:underline flex items-center gap-1"
                 title="Muat contoh data siswa dan guru"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
                 Contoh Data
               </button>
             </div>

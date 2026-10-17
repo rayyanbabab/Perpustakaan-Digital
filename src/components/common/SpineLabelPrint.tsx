@@ -58,9 +58,9 @@ export const SpineLabelPrint: React.FC<SpineLabelPrintProps> = ({ book, items, s
               {/* Header */}
               <div className="w-full border-b border-slate-200 pb-1 mb-2">
                 <div className="text-[10px] font-extrabold uppercase tracking-tight text-blue-900">
-                  {settings?.schoolName || 'SMA NEGERI 3 NGANJUK'}
+                  {settings?.schoolName || 'POLITEKNIK ASTRA'}
                 </div>
-                <div className="text-[8px] font-semibold text-amber-700">WIDYA PUSTAKA</div>
+                <div className="text-[8px] font-semibold text-amber-700">{settings?.shortName || 'ASTRA LIBRARY'}</div>
               </div>
 
               {/* Call Number / No Panggil Box */}

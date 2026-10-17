@@ -2,6 +2,7 @@ import { db } from './server/db.ts';
 import bcrypt from 'bcryptjs';
 
 async function updatePasswords() {
+  await db.init();
   const data = db.getData();
   
   const passwords = {
@@ -22,10 +23,12 @@ async function updatePasswords() {
 
   if (updated > 0) {
     db.saveDatabase(data);
-    console.log('Database saved.');
+    await db.flushToNeon();
+    console.log('Database saved and synced to Neon.');
   } else {
     console.log('No users found to update.');
   }
+  process.exit(0);
 }
 
 updatePasswords();

@@ -36,8 +36,10 @@ router.post('/recommend', async (req: Request, res: Response) => {
     const matched = books.filter(
       (b) =>
         b.title.toLowerCase().includes(query) ||
-        b.category.toLowerCase().includes(query) ||
-        b.subject.toLowerCase().includes(query)
+        (b.category || '').toLowerCase().includes(query) ||
+        (b.subject || '').toLowerCase().includes(query) ||
+        (b.author || '').toLowerCase().includes(query) ||
+        (b.description || '').toLowerCase().includes(query)
     );
     const selected = matched.length > 0 ? matched.slice(0, 3) : books.slice(0, 3);
 
@@ -54,13 +56,13 @@ router.post('/recommend', async (req: Request, res: Response) => {
   }
 
   try {
-    const prompt = `Anda adalah Asisten Pustakawan AI Cerdas untuk Perpustakaan SMA Negeri 3 Nganjuk bernama "Widya Pustaka".
+    const prompt = `Anda adalah Asisten Pustakawan AI Cerdas untuk Perpustakaan Politeknik Astra bernama "Astra Library".
 Berikut adalah sebagian katalog buku yang tersedia di perpustakaan:
 ${JSON.stringify(catalogSummary, null, 2)}
 
-Pengguna (${role}) memiliki minat baca / topik belajar: "${interest || topic || 'Sains dan Sastra Klasik'}".
+Pengguna (${role}) memiliki minat baca / topik belajar: "${interest || topic || 'Teknik, Vokasi, dan Sains Terapan'}".
 
-Tolong pilihkan 3 buku terbaik dari katalog di atas dan berikan alasan pedagogis/inspiratif mengapa buku tersebut sangat direkomendasikan untuk dibaca siswa/guru SMA.
+Tolong pilihkan 3 buku terbaik dari katalog di atas dan berikan alasan inspiratif mengapa buku tersebut sangat direkomendasikan untuk mahasiswa/dosen Politeknik Astra.
 Berikan respons HANYA dalam format JSON valid berupa array objek:
 [
   {
@@ -106,7 +108,7 @@ Berikan respons HANYA dalam format JSON valid berupa array objek:
         title: b.title,
         author: b.author,
         coverUrl: b.coverUrl,
-        reason: `Rekomendasi buku unggulan literasi SMA Negeri 3 Nganjuk untuk memperluas cakrawala berpikir.`
+        reason: `Rekomendasi buku unggulan literasi Politeknik Astra untuk memperluas cakrawala berpikir.`
       })),
       aiPowered: false
     });
@@ -129,7 +131,7 @@ router.post(
         classificationCode: '813',
         callNumber: `813 ${author ? author.slice(0, 3).toUpperCase() : 'NN'} ${title[0]?.toLowerCase()}`,
         category: 'Kesusastraan & Fiksi',
-        description: `Buku "${title}" karya ${author || 'Penulis'} merupakan referensi literasi yang bermanfaat untuk siswa dan guru di perpustakaan SMA Negeri 3 Nganjuk.`,
+        description: `Buku "${title}" karya ${author || 'Penulis'} merupakan referensi literasi yang bermanfaat untuk mahasiswa dan dosen di perpustakaan Politeknik Astra.`,
         subject: subject || 'Karya Sastra, Pendidikan',
         aiPowered: false
       });
@@ -180,7 +182,7 @@ Hasilkan HANYA JSON valid:
         classificationCode: '813',
         callNumber: `813 ${author ? author.slice(0, 3).toUpperCase() : 'NN'} ${title[0]?.toLowerCase()}`,
         category: 'Kesusastraan & Fiksi',
-        description: `Buku "${title}" karya ${author || 'Penulis'} merupakan referensi literasi untuk SMA Negeri 3 Nganjuk.`,
+        description: `Buku "${title}" karya ${author || 'Penulis'} merupakan referensi literasi untuk Politeknik Astra.`,
         subject: subject || 'Pendidikan, Karya Sastra',
         aiPowered: false
       });

@@ -36,10 +36,27 @@ const MainApp: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#F5F7FA] flex flex-col items-center justify-center space-y-3">
         <div className="w-10 h-10 border-4 border-[#1E3A8A] border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Memuat Widya Pustaka...</p>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Memuat Astra Library...</p>
       </div>
     );
   }
+
+  // Redirect siswa role to OPAC catalog by default or if accessing unauthorized admin pages
+  React.useEffect(() => {
+    if (user?.role === 'siswa') {
+      const allowedStudentRoutes = [
+        'opac',
+        'circulation-reservations',
+        'circulation-active',
+        'circulation-history',
+        'circulation-fines',
+        'profile'
+      ];
+      if (!allowedStudentRoutes.includes(currentRoute)) {
+        setCurrentRoute('opac');
+      }
+    }
+  }, [user, currentRoute]);
 
   // If user is guest and wants OPAC, let them see OPAC without login
   if (!isAuthenticated && currentRoute === 'opac') {
@@ -49,23 +66,23 @@ const MainApp: React.FC = () => {
           <div className="flex items-center gap-3">
             <img
               src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=96&auto=format&fit=crop&q=80"
-              alt="Logo SMAN 3 Nganjuk"
+              alt="Logo Politeknik Astra"
               className="w-8 h-8 rounded-full border border-amber-400"
             />
             <div>
-              <h2 className="font-black text-sm text-slate-900 dark:text-white">WIDYA PUSTAKA</h2>
-              <p className="text-[10px] text-slate-500">SMA NEGERI 3 NGANJUK</p>
+              <h2 className="font-black text-sm text-slate-900 dark:text-white">ASTRA LIBRARY</h2>
+              <p className="text-[10px] text-slate-500">POLITEKNIK ASTRA</p>
             </div>
           </div>
           <button
             onClick={() => setCurrentRoute('login')}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
           >
-            Masuk Portal Petugas
+            <span>Masuk / Login Akun</span>
           </button>
         </header>
         <main className="flex-1">
-          <OPAC />
+          <OPAC onNavigate={setCurrentRoute} />
         </main>
       </div>
     );
@@ -75,7 +92,13 @@ const MainApp: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <Login
-        onSuccess={() => setCurrentRoute('dashboard')}
+        onSuccess={() => {
+          if (user?.role === 'siswa') {
+            setCurrentRoute('opac');
+          } else {
+            setCurrentRoute('dashboard');
+          }
+        }}
         onOpenOpac={() => setCurrentRoute('opac')}
       />
     );
@@ -124,33 +147,36 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-[#1e293b] flex flex-col antialiased">
-      {/* Top Navbar */}
-      <Navbar
+    <div className="h-screen w-screen bg-[#F8FAFC] text-[#0F172A] flex overflow-hidden antialiased">
+      {/* Left Sidebar Navigation (Pinned Full-Height on Desktop, Drawer on Mobile) */}
+      <Sidebar
         currentRoute={currentRoute}
-        onNavigate={(route) => setCurrentRoute(route)}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onOpenQuickScan={() => setCurrentRoute('circulation-quick')}
+        onNavigate={(route) => {
+          setCurrentRoute(route);
+          setSidebarOpen(false);
+        }}
+        isOpenMobile={sidebarOpen}
+        onCloseMobile={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar Navigation */}
-        <Sidebar
+      {/* Right Column: Top Navbar + Scrollable Page Canvas + Footer */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+        {/* Pinned Top Navbar */}
+        <Navbar
           currentRoute={currentRoute}
-          onNavigate={(route) => {
-            setCurrentRoute(route);
-            setSidebarOpen(false);
-          }}
-          isOpenMobile={sidebarOpen}
-          onCloseMobile={() => setSidebarOpen(false)}
+          onNavigate={(route) => setCurrentRoute(route)}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          onOpenQuickScan={() => setCurrentRoute('circulation-quick')}
         />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-[#F5F7FA] pb-16 print:p-0 print:overflow-visible">
-          {renderContent()}
+        {/* Scrollable Page Body (Independent smooth scroll) */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar flex flex-col justify-between print:overflow-visible print:p-0">
+          <div className="flex-1">
+            {renderContent()}
+          </div>
+          <Footer />
         </main>
       </div>
-      <Footer />
     </div>
   );
 };

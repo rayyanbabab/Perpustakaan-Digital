@@ -9,7 +9,27 @@ const router = Router();
 router.get('/loans', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
   db.syncOverdueLoans();
   const { status, memberId, query } = req.query as { status?: string; memberId?: string; query?: string };
-  let loans = db.getData().loans;
+  const data = db.getData();
+  let loans = data.loans.map((l) => {
+    const member = data.members.find((m) => m.id === l.memberId || m.memberCode === l.memberCode);
+    return {
+      ...l,
+      memberPhone: l.memberPhone || member?.phone || '',
+      memberEmail: l.memberEmail || member?.email || ''
+    };
+  });
+
+  if (req.user?.role === 'siswa') {
+    const userMemberId = req.user.memberId;
+    const userCode = req.user.username?.toLowerCase();
+    const userName = req.user.fullName?.toLowerCase();
+    loans = loans.filter(
+      (l) =>
+        (userMemberId && l.memberId === userMemberId) ||
+        (userCode && l.memberCode.toLowerCase() === userCode) ||
+        (userName && l.memberName.toLowerCase().includes(userName))
+    );
+  }
 
   if (status && status !== 'all') {
     loans = loans.filter((l) => l.status === status);
@@ -33,6 +53,140 @@ router.get('/loans', authMiddleware, (req: AuthenticatedRequest, res: Response) 
   loans.sort((a, b) => new Date(b.loanDate).getTime() - new Date(a.loanDate).getTime());
   return res.json({ total: loans.length, loans });
 });
+
+// POST /api/circulation/borrow - Process Loan Transaction
+router.post(
+  '/borrow',
+  authMiddleware,
+  requireRoles('superadmin', 'admin', 'pustakawan'),
+  (req: AuthenticatedRequest, res: Response) => {
+    db.syncOverdueLoans();
+    const { memberId, barcodes, notes } = req.body;
+
+    if (!memberId) {
+      return res.status(400).json({ error: 'Pilih anggota peminjam.' });
+    }
+
+    const barcodeList = Array.isArray(barcodes) ? barcodes : [barcodes].filter(Boolean);
+    if (barcodeList.length === 0) {
+      return res.status(400).json({ error: 'Pindai minimal 1 buku yang akan dipinjam.' });
+    }
+
+    const data = db.getData();
+
+    // 1. Find and validate member
+    const member = data.members.find(
+      (m) => m.id === memberId || m.memberCode === memberId || m.identityNumber === memberId
+    );
+    if (!member) {
+      return res.status(404).json({ error: 'Data anggota tidak ditemukan.' });
+    }
+    if (member.status !== 'active') {
+      return res.status(400).json({ error: `Anggota tidak dapat meminjam karena berstatus: ${member.status}.` });
+    }
+
+    // 2. Validate member loan rules
+    const memberTypeKey = (member.type || 'SISWA').toLowerCase() as 'siswa' | 'guru' | 'tendik';
+    const rule = data.settings.loanRules[memberTypeKey] || {
+      maxItems: 3,
+      maxExtensions: 2,
+      loanDurationDays: 7
+    };
+
+    // Count current active loans for this member
+    const activeMemberLoans = data.loans.filter(
+      (l) => (l.memberId === member.id || l.memberCode === member.memberCode) && (l.status === 'active' || l.status === 'overdue')
+    );
+    const currentBorrowedCount = activeMemberLoans.reduce((acc, l) => acc + l.items.filter((i) => !i.returnedAt).length, 0);
+
+    if (currentBorrowedCount + barcodeList.length > rule.maxItems) {
+      return res.status(400).json({
+        error: `Batas kuota pinjam (${rule.maxItems} buku) terlampaui. Saat ini anggota masih meminjam ${currentBorrowedCount} buku.`
+      });
+    }
+
+    // 3. Validate each book item
+    const loanItems: LoanItem[] = [];
+    for (const rawBarcode of barcodeList) {
+      const barcode = String(rawBarcode).trim();
+      const item = data.items.find((i) => i.barcode.toLowerCase() === barcode.toLowerCase());
+      if (!item) {
+        return res.status(404).json({ error: `Eksemplar buku dengan barcode "${barcode}" tidak ditemukan.` });
+      }
+      if (item.status !== 'available') {
+        return res.status(400).json({ error: `Eksemplar buku "${barcode}" sedang tidak tersedia (Status: ${item.status}).` });
+      }
+
+      const book = data.books.find((b) => b.id === item.bookId);
+      loanItems.push({
+        itemId: item.id,
+        bookId: item.bookId,
+        barcode: item.barcode,
+        bookTitle: book?.title || 'Koleksi Perpustakaan',
+        author: book?.author || '',
+        callNumber: book?.callNumber || '',
+        coverUrl: book?.coverUrl || ''
+      });
+    }
+
+    // 4. Calculate loan dates
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const dueDate = new Date(today.getTime() + rule.loanDurationDays * 24 * 60 * 60 * 1000);
+    const dueDateStr = dueDate.toISOString().split('T')[0];
+
+    // 5. Create new loan record
+    const loanCode = `PJ-${todayStr.replace(/-/g, '')}-${(data.loans.length + 1).toString().padStart(4, '0')}`;
+    const newLoan: Loan = {
+      id: 'loan-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+      loanCode,
+      memberId: member.id,
+      memberCode: member.memberCode,
+      memberName: member.name,
+      memberType: member.type,
+      memberPhone: member.phone || '',
+      memberEmail: member.email || '',
+      officerId: req.user!.id,
+      officerName: req.user!.fullName,
+      loanDate: todayStr,
+      dueDate: dueDateStr,
+      status: 'active',
+      extensionCount: 0,
+      maxExtensions: rule.maxExtensions || 2,
+      items: loanItems,
+      notes: notes?.trim()
+    };
+
+    // 6. Update item statuses
+    barcodeList.forEach((rawBarcode: string) => {
+      const barcode = String(rawBarcode).trim();
+      const item = data.items.find((i) => i.barcode.toLowerCase() === barcode.toLowerCase());
+      if (item) {
+        item.status = 'borrowed';
+      }
+    });
+
+    data.loans.unshift(newLoan);
+    db.saveDatabase();
+
+    db.logActivity({
+      userId: req.user!.id,
+      username: req.user!.username,
+      role: req.user!.role,
+      module: 'LOANS',
+      action: 'BORROW',
+      recordId: newLoan.id,
+      recordIdentifier: newLoan.loanCode,
+      description: `Peminjaman ${newLoan.items.length} buku oleh ${newLoan.memberName} (${newLoan.memberCode}) hingga ${dueDateStr}`,
+      ipAddress: req.ip || '127.0.0.1'
+    });
+
+    return res.status(201).json({
+      message: `Peminjaman ${loanCode} berhasil diproses!`,
+      loan: newLoan
+    });
+  }
+);
 
 // POST /api/circulation/bulk-loan-import - Bulk Loan Import
 router.post(
@@ -420,20 +574,38 @@ router.post(
 
 // GET /api/circulation/reservations - List reservations
 router.get('/reservations', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
-  const { status } = req.query as { status?: string };
-  let reservations = db.getData().reservations;
+  const { status, bookId } = req.query as { status?: string; bookId?: string };
+  let reservations = db.getData().reservations || [];
 
   if (status && status !== 'all') {
     reservations = reservations.filter((r) => r.status === status);
   }
 
-  reservations.sort((a, b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime());
+  if (bookId) {
+    reservations = reservations.filter((r) => r.bookId === bookId);
+  }
+
+  // If student role, restrict to their own reservations
+  if (req.user?.role === 'siswa') {
+    const userMemberId = req.user.memberId;
+    const userCode = req.user.username?.toLowerCase();
+    const userName = req.user.fullName?.toLowerCase();
+    reservations = reservations.filter(
+      (r) =>
+        (userMemberId && r.memberId === userMemberId) ||
+        (userCode && r.memberCode.toLowerCase() === userCode) ||
+        (userName && r.memberName.toLowerCase().includes(userName))
+    );
+  }
+
+  reservations.sort((a, b) => new Date(b.requestDate || b.reservationDate || 0).getTime() - new Date(a.requestDate || a.reservationDate || 0).getTime());
   return res.json({ total: reservations.length, reservations });
 });
 
-// POST /api/circulation/reservations - Create reservation
-router.post('/reservations', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
-  const { bookId, memberId, notes } = req.body;
+// POST /api/circulation/reservations & /api/circulation/reserve - Create reservation
+const handleCreateReservation = (req: AuthenticatedRequest, res: Response) => {
+  const { bookId, notes } = req.body;
+  let memberId = req.body.memberId;
   if (!bookId) {
     return res.status(400).json({ error: 'Buku wajib dipilih.' });
   }
@@ -445,74 +617,145 @@ router.post('/reservations', authMiddleware, (req: AuthenticatedRequest, res: Re
   }
 
   // Determine member: either provided or current logged in user
-  let member = data.members.find((m) => m.id === memberId);
+  let member = data.members.find((m) => m.id === memberId || m.memberCode === memberId);
   if (!member && req.user?.memberId) {
-    member = data.members.find((m) => m.id === req.user?.memberId);
+    member = data.members.find((m) => m.id === req.user?.memberId || m.memberCode === req.user?.memberId);
   }
-  if (!member) {
-    // try finding by username or email
+  if (!member && req.user) {
     member = data.members.find(
-      (m) => m.email.toLowerCase() === req.user?.email.toLowerCase() || m.name.toLowerCase() === req.user?.fullName.toLowerCase()
+      (m) =>
+        (req.user?.email && m.email.toLowerCase() === req.user.email.toLowerCase()) ||
+        (req.user?.fullName && m.name.toLowerCase() === req.user.fullName.toLowerCase()) ||
+        (req.user?.username && m.memberCode.toLowerCase() === req.user.username.toLowerCase())
     );
+  }
+
+  // Auto-create/link member if not yet registered in members list
+  if (!member && req.user) {
+    const newMemberId = req.user.memberId || ('mem-' + req.user.id);
+    member = {
+      id: newMemberId,
+      memberCode: (req.user.username || 'SISWA').toUpperCase(),
+      type: (req.user.role === 'guru' ? 'GURU' : 'SISWA') as any,
+      identityNumber: req.user.username || '10101',
+      name: req.user.fullName || req.user.name || req.user.username,
+      gender: 'L',
+      phone: '081234567890',
+      email: req.user.email || `${req.user.username}@polytechnic.astra.ac.id`,
+      status: 'active',
+      registeredDate: new Date().toISOString().split('T')[0],
+      notes: 'Otomatis dibuat saat booking buku mandiri'
+    };
+    data.members.push(member);
+    req.user.memberId = newMemberId;
+    const uIdx = data.users.findIndex((u) => u.id === req.user!.id);
+    if (uIdx !== -1) {
+      data.users[uIdx].memberId = newMemberId;
+    }
   }
 
   if (!member) {
     return res.status(400).json({ error: 'Data anggota pemohon reservasi tidak valid.' });
   }
 
-  // Check if member already reserved this book
+  // Check if member already reserved this book (active pending/waiting/ready)
   const existing = data.reservations.find(
-    (r) => r.bookId === book.id && r.memberId === member!.id && (r.status === 'waiting' || r.status === 'ready')
+    (r) => r.bookId === book.id && r.memberId === member!.id && (r.status === 'pending' || r.status === 'waiting' || r.status === 'ready')
   );
   if (existing) {
     return res.status(400).json({ error: 'Anda sudah memiliki antrean reservasi aktif untuk buku ini.' });
   }
 
   const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
   const exp = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const expStr = exp.toISOString().split('T')[0];
+  const reservationCode = `RSV-${todayStr.replace(/-/g, '')}-${(data.reservations.length + 1).toString().padStart(4, '0')}`;
 
   const reservation: Reservation = {
-    id: 'res-' + Date.now(),
+    id: 'res-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    reservationCode,
     bookId: book.id,
     bookTitle: book.title,
     coverUrl: book.coverUrl,
     memberId: member.id,
     memberName: member.name,
     memberCode: member.memberCode,
-    requestDate: today.toISOString().split('T')[0],
-    expiryDate: exp.toISOString().split('T')[0],
-    status: 'waiting',
-    notes: notes?.trim() || 'Reservasi dibuat mandiri'
+    requestDate: todayStr,
+    reservationDate: todayStr,
+    expiryDate: expStr,
+    status: 'pending',
+    notes: notes?.trim() || 'Reservasi dibuat mandiri via OPAC'
   };
 
-  data.reservations.push(reservation);
+  data.reservations.unshift(reservation);
   db.saveDatabase();
+
+  db.logActivity({
+    userId: req.user?.id || 'usr-guest',
+    username: req.user?.username || 'member',
+    role: req.user?.role || 'siswa',
+    module: 'CIRCULATION',
+    action: 'RESERVE',
+    description: `Booking/Reservasi buku "${book.title}" (${reservationCode}) oleh ${member.name}`,
+    ipAddress: req.ip || req.socket.remoteAddress || '127.0.0.1'
+  });
 
   return res.status(201).json({
     message: `Reservasi buku "${book.title}" berhasil ditempatkan dalam antrean.`,
     reservation
   });
-});
+};
 
-// PUT /api/circulation/reservations/:id/status - Update reservation status (ready, collected, cancelled)
-router.put(
-  '/reservations/:id/status',
-  authMiddleware,
-  requireRoles('superadmin', 'admin', 'pustakawan'),
-  (req: AuthenticatedRequest, res: Response) => {
-    const { status } = req.body;
-    const data = db.getData();
-    const resv = data.reservations.find((r) => r.id === req.params.id);
+router.post('/reservations', authMiddleware, handleCreateReservation);
+router.post('/reserve', authMiddleware, handleCreateReservation);
 
-    if (!resv) {
-      return res.status(404).json({ error: 'Reservasi tidak ditemukan.' });
-    }
+// Update reservation status (ready, completed, cancelled) - supports PUT & PATCH
+const handleUpdateReservationStatus = (req: AuthenticatedRequest, res: Response) => {
+  const { status } = req.body;
+  const data = db.getData();
+  const resv = data.reservations.find((r) => r.id === req.params.id);
 
-    resv.status = status;
-    db.saveDatabase();
-
-    return res.json({ message: 'Status reservasi berhasil diperbarui.', reservation: resv });
+  if (!resv) {
+    return res.status(404).json({ error: 'Reservasi tidak ditemukan.' });
   }
-);
+
+  // If status is 'cancelled', allow either the owner of the reservation OR staff
+  const isOwner =
+    req.user &&
+    (resv.memberId === req.user.memberId ||
+      resv.memberCode?.toLowerCase() === req.user.username?.toLowerCase() ||
+      resv.memberName?.toLowerCase() === req.user.fullName?.toLowerCase());
+  const isStaff = ['superadmin', 'admin', 'pustakawan'].includes(req.user?.role || '');
+
+  if (status === 'cancelled') {
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({ error: 'Anda tidak memiliki hak untuk membatalkan reservasi ini.' });
+    }
+  } else {
+    // Other statuses (ready, completed) require staff
+    if (!isStaff) {
+      return res.status(403).json({ error: 'Hanya petugas perpustakaan yang dapat mengubah status reservasi ini.' });
+    }
+  }
+
+  resv.status = status;
+  db.saveDatabase();
+
+  db.logActivity({
+    userId: req.user?.id || 'usr-system',
+    username: req.user?.username || 'system',
+    role: req.user?.role || 'siswa',
+    module: 'CIRCULATION',
+    action: 'UPDATE_STATUS',
+    description: `Status reservasi ${resv.reservationCode || resv.id} diubah menjadi "${status}"`,
+    ipAddress: req.ip || req.socket.remoteAddress || '127.0.0.1'
+  });
+
+  return res.json({ message: 'Status reservasi berhasil diperbarui.', reservation: resv });
+};
+
+router.put('/reservations/:id/status', authMiddleware, handleUpdateReservationStatus);
+router.patch('/reservations/:id/status', authMiddleware, handleUpdateReservationStatus);
 
 export default router;

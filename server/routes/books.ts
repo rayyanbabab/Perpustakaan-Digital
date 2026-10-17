@@ -44,12 +44,12 @@ router.get('/opac', (req: Request, res: Response) => {
       (b) =>
         b.title.toLowerCase().includes(q) ||
         (b.subtitle && b.subtitle.toLowerCase().includes(q)) ||
-        b.author.toLowerCase().includes(q) ||
-        b.isbn.toLowerCase().includes(q) ||
-        b.publisher.toLowerCase().includes(q) ||
-        b.subject.toLowerCase().includes(q) ||
-        b.category.toLowerCase().includes(q) ||
-        b.callNumber.toLowerCase().includes(q)
+        (b.author || '').toLowerCase().includes(q) ||
+        (b.isbn || '').toLowerCase().includes(q) ||
+        (b.publisher || '').toLowerCase().includes(q) ||
+        (b.subject || '').toLowerCase().includes(q) ||
+        (b.category || '').toLowerCase().includes(q) ||
+        (b.callNumber || '').toLowerCase().includes(q)
     );
   }
 
@@ -95,10 +95,10 @@ router.get('/', (req: Request, res: Response) => {
     books = books.filter(
       (b) =>
         b.title.toLowerCase().includes(q) ||
-        b.author.toLowerCase().includes(q) ||
-        b.isbn.toLowerCase().includes(q) ||
-        b.publisher.toLowerCase().includes(q) ||
-        b.callNumber.toLowerCase().includes(q)
+        (b.author || '').toLowerCase().includes(q) ||
+        (b.isbn || '').toLowerCase().includes(q) ||
+        (b.publisher || '').toLowerCase().includes(q) ||
+        (b.callNumber || '').toLowerCase().includes(q)
     );
   }
 
@@ -555,7 +555,7 @@ router.post(
         subject: b.subject?.trim() || 'Umum',
         classificationCode: b.classificationCode?.trim() || '000',
         callNumber: b.callNumber?.trim() || `000 ${b.author.slice(0, 3).toUpperCase()} ${b.title[0]?.toLowerCase()}`,
-        description: b.description?.trim() || 'Koleksi perpustakaan SMA Negeri 3 Nganjuk',
+        description: b.description?.trim() || 'Koleksi perpustakaan Politeknik Astra',
         pages: Number(b.pages) || 200,
         dimension: b.dimension?.trim() || '15 x 23 cm',
         source: b.source || 'BOS Reguler',

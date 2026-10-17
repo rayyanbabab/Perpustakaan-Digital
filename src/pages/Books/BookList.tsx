@@ -11,7 +11,7 @@ import {
   Trash2,
   Tag,
   Barcode,
-  Sparkles,
+  BookPlus,
   Printer,
   X,
   MapPin,
@@ -350,7 +350,7 @@ export const BookList: React.FC = () => {
             filenamePrefix="koleksi_buku_perpustakaan"
             sheetName="Daftar Buku"
             title="Daftar Koleksi Bibliografi Perpustakaan"
-            subtitle={`Widya Pustaka SMAN 3 Nganjuk - Total: ${books.length} judul`}
+            subtitle={`Astra Library Politeknik Astra - Total: ${books.length} judul`}
             label="Ekspor Koleksi"
           />
 
@@ -514,20 +514,20 @@ export const BookList: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveBook} className="space-y-4">
-              {/* AI Assist Action Bar */}
-              <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs text-blue-900 dark:text-blue-300">
-                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>Katalogisasi Otomatis AI (DDC, Call Number, Sinopsis)</span>
+              {/* Automated Catalog Assist Bar */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs text-slate-800">
+                  <BookPlus className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span className="font-medium">Katalogisasi Otomatis Bibliografi (DDC, Call Number, Sinopsis)</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleAiCatalogAssist}
                   disabled={aiCatalogLoading}
-                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-xs shrink-0 flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-medium text-xs rounded-lg shadow-xs shrink-0 flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {aiCatalogLoading ? 'Memproses AI...' : 'Isi Otomatis dengan AI'}
+                  <BookPlus className="w-3.5 h-3.5" />
+                  {aiCatalogLoading ? 'Memproses Bibliografi...' : 'Lengkapi Otomatis'}
                 </button>
               </div>
 

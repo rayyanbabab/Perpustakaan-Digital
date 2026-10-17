@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Sparkles,
+  Cpu,
   RefreshCw,
   Search,
   Filter,
@@ -37,7 +37,7 @@ const AVATAR_PRESETS = [
 ];
 
 export const UserProfile: React.FC = () => {
-  const { user, refreshUserData } = useAuth();
+  const { user, settings, refreshUserData } = useAuth();
   const { success, error, warning } = useToast();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'logs' | 'permissions'>('profile');
@@ -287,11 +287,11 @@ export const UserProfile: React.FC = () => {
             <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <div className="bg-white/10 backdrop-blur-xs border border-white/10 rounded-xl px-3 py-1.5 text-[11px] text-blue-100 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5 text-amber-400" />
-                <span>Unit: <strong>SMA Negeri 3 Nganjuk</strong></span>
+                <span>Unit: <strong>{settings?.schoolName || 'Politeknik Astra'}</strong></span>
               </div>
               <div className="bg-white/10 backdrop-blur-xs border border-white/10 rounded-xl px-3 py-1.5 text-[11px] text-blue-100 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-blue-300" />
-                <span>Sistem: <strong>Widya Pustaka Library v2.4</strong></span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-300" />
+                <span>Sistem: <strong>Astra Library v2.4</strong></span>
               </div>
             </div>
           </div>
@@ -684,7 +684,7 @@ export const UserProfile: React.FC = () => {
               filenamePrefix={`log_aktivitas_${user?.username}`}
               sheetName="Log Aktivitas Pengguna"
               title={`Riwayat Log Aktivitas Pengguna: ${user?.fullName || user?.username}`}
-              subtitle={`Dicetak dari Widya Pustaka SMAN 3 Nganjuk - Total: ${logs.length} data`}
+              subtitle={`Dicetak dari Astra Library Politeknik Astra - Total: ${logs.length} data`}
               label="Ekspor Log"
             />
           </div>

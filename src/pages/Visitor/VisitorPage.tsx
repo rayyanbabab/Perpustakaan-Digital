@@ -10,8 +10,7 @@ import {
   CheckCircle2,
   Clock,
   BookOpen,
-  Calendar,
-  Sparkles
+  Calendar
 } from 'lucide-react';
 
 export const VisitorPage: React.FC = () => {
@@ -88,7 +87,7 @@ export const VisitorPage: React.FC = () => {
             Buku Tamu Digital (Presensi Pengunjung)
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Anjungan mandiri presensi kehadiran siswa, guru, dan staf di Perpustakaan Widya Pustaka SMA Negeri 3 Nganjuk.
+            Anjungan mandiri presensi kehadiran mahasiswa, dosen, dan staf di Perpustakaan Astra Library Politeknik Astra.
           </p>
         </div>
 
