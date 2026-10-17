@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #F5F7FA;
+    color: #1e293b;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+/* Custom compact scrollbars for high-density interface */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(147, 197, 253, 0.4);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 197, 253, 0.7);
+}
+
+/* ==========================================================================
+   GLOBAL PRINT STYLESHEET (A4, Thermal 80mm/58mm, CR80 PVC Cards, Invoices)
+   ========================================================================== */
+
+@media print {
+  /* Universal Print Reset & Exact Color Preservation */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Default A4 Paper Margin */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm 15mm 15mm;
+  }
+
+  /* Hide Interactive UI Elements When Printing */
+  header,
+  aside,
+  nav,
+  footer,
+  .no-print,
+  .print-hidden,
+  button,
+  input[type="button"],
+  input[type="submit"],
+  .toast-container,
+  #quick-scan-trigger {
+    display: none !important;
+  }
+
+  /* Force display of print-only components */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Main wrapper reset */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* Page Break Controls */
+  .print-avoid-break,
+  tr,
+  figure,
+  .print-card,
+  .print-signature-block,
+  .kop-surat {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-break-before {
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  .print-break-after {
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+
+  /* Official Document Table Formatting */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  th, td {
+    padding: 5pt 7pt !important;
+    border: 0.75pt solid #cbd5e1 !important;
+  }
+
+  th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  /* Thermal Receipt Paper (80mm and 58mm POS) */
+  .print-thermal-receipt {
+    width: 76mm !important;
+    max-width: 76mm !important;
+    margin: 0 auto !important;
+    padding: 4mm !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 8.5pt !important;
+    line-height: 1.25 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .print-thermal-receipt hr {
+    border-top: 1pt dashed #475569 !important;
+  }
+
+  /* CR80 Standard Member / ID Card (85.6mm x 53.98mm) */
+  .print-member-card {
+    width: 85.6mm !important;
+    height: 53.98mm !important;
+    max-width: 85.6mm !important;
+    max-height: 53.98mm !important;
+    margin: 4mm auto !important;
+    padding: 3.5mm !important;
+    border-radius: 3mm !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Spine Labels & Barcode Stickers */
+  .print-spine-label {
+    width: 45mm !important;
+    height: 30mm !important;
+    padding: 2mm !important;
+    font-size: 8pt !important;
+    border: 0.5pt solid #000000 !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+  }
+
+  /* Link Display Suppression */
+  a[href]::after {
+    content: none !important;
+  }
+}
+
+/* Print Utilities for Tailwind Layouts */
+.print-only {
+  display: none;
+}
