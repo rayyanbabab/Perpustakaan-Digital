@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { db, collection, onSnapshot, query, where } from '../lib/firebase';
 import {
   BookOpen,
   Users,
@@ -47,6 +48,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, setCurrentTab 
   const { user, settings } = useAuth();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  const [realtimeStats, setRealtimeStats] = useState({
+    visitorsToday: 0,
+    activeLoans: 0,
+    unpaidFines: 0
+  });
 
   const fetchDashboardData = async () => {
     try {
@@ -64,6 +71,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, setCurrentTab 
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Listeners
+    const today = new Date().toISOString().split('T')[0];
+    const visitorsQuery = query(collection(db, 'visitors'), where('date', '==', today));
+    const unsubscribeVisitors = onSnapshot(visitorsQuery, (snapshot) => {
+      setRealtimeStats(prev => ({ ...prev, visitorsToday: snapshot.size }));
+    });
+
+    const loansQuery = query(collection(db, 'loans'), where('status', 'in', ['active', 'overdue']));
+    const unsubscribeLoans = onSnapshot(loansQuery, (snapshot) => {
+      setRealtimeStats(prev => ({ ...prev, activeLoans: snapshot.size }));
+    });
+
+    const finesQuery = query(collection(db, 'fines'), where('status', 'in', ['unpaid', 'partial']));
+    const unsubscribeFines = onSnapshot(finesQuery, (snapshot) => {
+      setRealtimeStats(prev => ({ ...prev, unpaidFines: snapshot.size }));
+    });
+
+    return () => {
+      unsubscribeVisitors();
+      unsubscribeLoans();
+      unsubscribeFines();
+    };
   }, []);
 
   if (loading || !data) {
@@ -84,6 +114,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, setCurrentTab 
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto select-none">
+      {/* Real-time Stats Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Pengunjung Hari Ini</h3>
+          <p className="text-2xl font-bold text-slate-800">{realtimeStats.visitorsToday}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Peminjaman Aktif</h3>
+          <p className="text-2xl font-bold text-slate-800">{realtimeStats.activeLoans}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Denda Belum Dibayar</h3>
+          <p className="text-2xl font-bold text-slate-800">{realtimeStats.unpaidFines}</p>
+        </div>
+      </section>
+
       {/* Top Section 4-KPI Grid (High Density archetype) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
         {/* KPI 1: Total Judul */}

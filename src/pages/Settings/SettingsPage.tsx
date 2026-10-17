@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { backupFirestoreData } from '../../lib/backup';
 import { useToast } from '../../context/ToastContext';
 import { SystemSettings, ActivityLog } from '../../types';
 import { UserManagementView } from './UserManagementView';
@@ -167,9 +168,20 @@ export const SettingsPage: React.FC = () => {
   };
 
   // Backup & Restore
+  const [selectedCollection, setSelectedCollection] = useState('books');
+
   const handleDownloadBackup = async () => {
     try {
-      const res = await fetch('/api/settings/backup', {
+      await backupFirestoreData();
+      success('Database berhasil diunduh!');
+    } catch (e) {
+      error('Gagal mengunduh database');
+    }
+  };
+
+  const handleExportCollection = async () => {
+    try {
+      const res = await fetch(`/api/settings/export-collection/${selectedCollection}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('widya_pustaka_token')}` }
       });
       if (res.ok) {
@@ -178,12 +190,14 @@ export const SettingsPage: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `backup_widya_pustaka_${Date.now()}.json`;
+        a.download = `backup_${selectedCollection}_${Date.now()}.json`;
         a.click();
-        success('Cadangan database berhasil diunduh!');
+        success(`Koleksi ${selectedCollection} berhasil diunduh!`);
+      } else {
+        error(`Gagal mengunduh koleksi ${selectedCollection}`);
       }
     } catch (e) {
-      error('Gagal mengunduh backup');
+      error(`Gagal mengunduh koleksi ${selectedCollection}`);
     }
   };
 
@@ -747,8 +761,30 @@ function updateSheet(ss, sheetName, items) {
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Download Database Backup (.JSON)
+              Download Full Database Backup (.JSON)
             </button>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs">Export Koleksi Spesifik</h4>
+              <select
+                value={selectedCollection}
+                onChange={(e) => setSelectedCollection(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
+              >
+                <option value="books">Buku</option>
+                <option value="members">Anggota</option>
+                <option value="loans">Peminjaman</option>
+                <option value="fines">Denda</option>
+                <option value="visitors">Pengunjung</option>
+              </select>
+              <button
+                onClick={handleExportCollection}
+                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export Koleksi
+              </button>
+            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
