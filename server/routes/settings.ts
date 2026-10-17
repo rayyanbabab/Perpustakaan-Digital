@@ -140,9 +140,13 @@ router.post(
       overwriteExisting = false
     } = req.body;
 
+    console.log('Generating student accounts, config:', { passwordType, usernameFormat, overwriteExisting });
+
     const data = db.getData();
     const members = data.members || [];
     const studentMembers = members.filter((m) => m.type?.toUpperCase() === 'SISWA');
+    
+    console.log('Found', studentMembers.length, 'students.');
 
     if (studentMembers.length === 0) {
       return res.status(400).json({ error: 'Tidak ada data pemustaka bertipe SISWA di dalam database.' });
@@ -162,8 +166,9 @@ router.post(
       status: 'created' | 'updated' | 'skipped';
     }> = [];
 
-    studentMembers.forEach((student) => {
+    for (const student of studentMembers) {
       const nis = student.identityNumber?.trim() || student.id;
+      // Handle special class grade formatting if needed, though NIS is usually sufficient
       const targetUsername = usernameFormat === 'prefix_nis' ? `siswa_${nis}` : nis;
       
       // Determine default password
@@ -247,19 +252,23 @@ router.post(
           status: 'created'
         });
       }
-    });
+    }
 
-    db.saveDatabase();
-
-    db.logActivity({
-      userId: req.user!.id,
-      username: req.user!.username,
-      role: req.user!.role,
-      module: 'SETTINGS',
-      action: 'CREATE',
-      description: `Generasi otomatis akun pengguna siswa: ${createdCount} akun baru dibuat, ${updatedCount} diperbarui, ${skippedCount} dilewati`,
-      ipAddress: req.ip || '127.0.0.1'
-    });
+    try {
+      db.saveDatabase();
+      db.logActivity({
+        userId: req.user!.id,
+        username: req.user!.username,
+        role: req.user!.role,
+        module: 'SETTINGS',
+        action: 'CREATE',
+        description: `Generasi otomatis akun pengguna siswa: ${createdCount} akun baru dibuat, ${updatedCount} diperbarui, ${skippedCount} dilewati`,
+        ipAddress: req.ip || '127.0.0.1'
+      });
+    } catch (dbErr) {
+      console.error('Error saving database or logging activity:', dbErr);
+      return res.status(500).json({ error: `Gagal menyimpan perubahan ke database: ${dbErr instanceof Error ? dbErr.message : String(dbErr)}` });
+    }
 
     return res.json({
       message: `Berhasil memproses pembuatan akun siswa otomatis (${createdCount} akun baru dibuat, ${updatedCount} diperbarui).`,
@@ -848,6 +857,42 @@ router.post(
       categories: categoryNames,
       locations: locationNames
     });
+  }
+);
+
+// POST /api/settings/reset-database - Reset database to initial state (keep settings and users)
+router.post(
+  '/reset-database',
+  authMiddleware,
+  requireRoles('superadmin'),
+  (req: AuthenticatedRequest, res: Response) => {
+    const internalData = db.getData();
+    
+    // Reset specific collections
+    internalData.books = [];
+    internalData.items = [];
+    internalData.loans = [];
+    internalData.fines = [];
+    internalData.members = [];
+    internalData.activityLogs = [];
+    internalData.reservations = [];
+    internalData.stockOpnames = [];
+    internalData.serials = [];
+    internalData.backups = [];
+    
+    db.saveDatabase();
+    
+    db.logActivity({
+      userId: req.user!.id,
+      username: req.user!.username,
+      role: req.user!.role,
+      module: 'SETTINGS',
+      action: 'RESET_DATABASE',
+      description: 'Menghapus seluruh data perpustakaan (buku, anggota, peminjaman, denda, log).',
+      ipAddress: req.ip || '127.0.0.1'
+    });
+    
+    return res.json({ message: 'Database perpustakaan berhasil direset.' });
   }
 );
 

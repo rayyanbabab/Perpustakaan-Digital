@@ -86,9 +86,9 @@ export const MemberImportExport: React.FC = () => {
 
   const handleLoadSample = () => {
     const sampleTsv = `Nama Lengkap\tTipe Anggota\tNIS / NIP / NUPTK\tJenis Kelamin (L/P)\tKelas / Rombel\tMata Pelajaran / Tugas\tNomor WhatsApp\tAlamat Email\tAlamat Domisili
-Ahmad Fauzi Ramadhan\tSISWA\t202410106\tL\tX-E 1\t\t081234567801\tahmad.fauzi@sman3nganjuk.sch.id\tJl. Gatot Subroto No. 45, Nganjuk
-Siti Nur Aini\tSISWA\t202410107\tP\tX-E 2\t\t081234567802\tsiti.aini@sman3nganjuk.sch.id\tKec. Sukomoro, Kab. Nganjuk
-Bima Arya Pratama\tSISWA\t202310088\tL\tXI-F 1\t\t081234567803\tbima.arya@sman3nganjuk.sch.id\tKec. Berbek, Kab. Nganjuk
+Ahmad Fauzi Ramadhan\tSISWA\t202410106\tL\tKelas 10-A\t\t081234567801\tahmad.fauzi@sman3nganjuk.sch.id\tJl. Gatot Subroto No. 45, Nganjuk
+Siti Nur Aini\tSISWA\t202410107\tP\tKelas 10-B\t\t081234567802\tsiti.aini@sman3nganjuk.sch.id\tKec. Sukomoro, Kab. Nganjuk
+Bima Arya Pratama\tSISWA\t202310088\tL\tKelas 11-A\t\t081234567803\tbima.arya@sman3nganjuk.sch.id\tKec. Berbek, Kab. Nganjuk
 Drs. Sugeng Raharjo, M.Pd.\tGURU\t197808152003121004\tL\t\tFisika & Astronomi\t081234567810\tsugeng.raharjo@sman3nganjuk.sch.id\tJl. Mastrip No. 12, Nganjuk
 Dra. Hj. Sri Wahyuni, M.Pd.\tGURU\t197505102000032002\tP\t\tBahasa & Sastra Indonesia\t081234567811\tsri.wahyuni@sman3nganjuk.sch.id\tKec. Tanjunganom, Kab. Nganjuk
 Bambang Eko Santoso, S.Kom.\tTENDIK\t198902142019031008\tL\t\tLaboran IT & Teknisi\t081234567820\tbambang.eko@sman3nganjuk.sch.id\tKec. Loceret, Kab. Nganjuk`;
@@ -333,7 +333,7 @@ Bambang Eko Santoso, S.Kom.\tTENDIK\t198902142019031008\tL\t\tLaboran IT & Tekni
                   value={pastedText}
                   onChange={(e) => handleTextChange(e.target.value)}
                   rows={8}
-                  placeholder={`Nama Lengkap\tTipe\tNIS/NIP\tGender\tKelas\tMapel...\n(Salin baris siswa/guru dari Excel lalu paste di sini)`}
+                  placeholder={`Nama Lengkap\tTipe\tNIS/NIP\tGender\tKelas\tMapel...\n(Salin baris siswa/guru dari Excel lalu paste di sini, contoh: Kelas 10-A)`}
                   className="w-full p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20"
                 />
                 <p className="text-[11px] text-slate-400">

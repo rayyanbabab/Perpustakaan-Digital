@@ -179,6 +179,29 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleResetDatabase = async () => {
+    if (!window.confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SELURUH data perpustakaan (buku, anggota, peminjaman, denda, log)? Tindakan ini TIDAK DAPAT DIBATALKAN.')) {
+      return;
+    }
+    
+    try {
+      const res = await fetch('/api/settings/reset-database', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('widya_pustaka_token')}`
+        }
+      });
+      if (res.ok) {
+        success('Database berhasil direset.');
+        window.location.reload(); 
+      } else {
+        error('Gagal mereset database.');
+      }
+    } catch (e) {
+      error('Terjadi kesalahan.');
+    }
+  };
+
   const handleExportCollection = async () => {
     try {
       const res = await fetch(`/api/settings/export-collection/${selectedCollection}`, {
@@ -762,6 +785,13 @@ function updateSheet(ss, sheetName, items) {
             >
               <Download className="w-4 h-4" />
               Download Full Database Backup (.JSON)
+            </button>
+            <button
+              onClick={handleResetDatabase}
+              className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Reset Data Perpustakaan
             </button>
 
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">

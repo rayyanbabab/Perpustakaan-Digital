@@ -266,10 +266,10 @@ export const SingleStatusModal: React.FC<SingleStatusModalProps> = ({
                 <div>
                   <div className="font-bold text-xs flex items-center gap-1.5">
                     <UserX className="w-3.5 h-3.5 text-rose-600" />
-                    Nonaktif Umum / Cuti
+                    Mutasi / Nonaktif
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
-                    Penonaktifan sementara atau alasan administratif
+                    Penonaktifan sementara atau pindah tugas (Mutasi)
                   </div>
                 </div>
               </label>

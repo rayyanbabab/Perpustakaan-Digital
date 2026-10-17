@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TEMPORARY: Public read access to fix dashboard errors.
+    // TODO: Implement proper Firebase Auth or custom auth token integration.
+    match /visitors/{visitorId} {
+      allow read: if true;
+    }
+    match /loans/{loanId} {
+      allow read: if true;
+    }
+    match /fines/{fineId} {
+      allow read: if true;
+    }
+  }
+}

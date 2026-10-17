@@ -80,7 +80,10 @@ const defaultSettings: LibrarySettings = {
 };
 
 function getSeedData(): DatabaseSchema {
-  const hash = bcrypt.hashSync('admin123', 10);
+  const superadminHash = bcrypt.hashSync('wplsadmin', 10);
+  const adminHash = bcrypt.hashSync('admin123', 10);
+  const pustakawanHash = bcrypt.hashSync('widya123', 10);
+  const kepsekHash = bcrypt.hashSync('kswidya', 10);
   const teacherHash = bcrypt.hashSync('guru123', 10);
   const studentHash = bcrypt.hashSync('siswa123', 10);
 
@@ -91,7 +94,7 @@ function getSeedData(): DatabaseSchema {
       email: 'superadmin@sman3nganjuk.sch.id',
       fullName: 'Super Administrator',
       role: 'superadmin',
-      passwordHash: hash,
+      passwordHash: superadminHash,
       avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       isActive: true,
       createdAt: '2025-01-01T08:00:00Z'
@@ -102,7 +105,7 @@ function getSeedData(): DatabaseSchema {
       email: 'admin.perpus@sman3nganjuk.sch.id',
       fullName: 'Bambang Sudarmono, S.Sos.',
       role: 'admin',
-      passwordHash: hash,
+      passwordHash: adminHash,
       avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
       isActive: true,
       createdAt: '2025-01-02T08:00:00Z'
@@ -113,7 +116,7 @@ function getSeedData(): DatabaseSchema {
       email: 'pustakawan@sman3nganjuk.sch.id',
       fullName: 'Siti Rahmawati, S.I.Pust.',
       role: 'pustakawan',
-      passwordHash: hash,
+      passwordHash: pustakawanHash,
       avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
       isActive: true,
       createdAt: '2025-01-03T08:00:00Z'
@@ -124,7 +127,7 @@ function getSeedData(): DatabaseSchema {
       email: 'kepsek@sman3nganjuk.sch.id',
       fullName: 'Drs. H. Sukadi, M.Pd.',
       role: 'kepala_sekolah',
-      passwordHash: hash,
+      passwordHash: kepsekHash,
       avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
       isActive: true,
       createdAt: '2025-01-01T08:00:00Z'

@@ -141,70 +141,21 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onOpenOpac }) => {
             </button>
           </form>
 
-          {/* Quick Demo Switcher */}
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-2.5">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
-              Simulasi Cepat Role Akun (Demo Test)
-            </div>
-            <div className="grid grid-cols-3 gap-1.5 text-xs">
+          {/* Public OPAC link */}
+          {onOpenOpac && (
+            <div className="text-center">
               <button
-                type="button"
-                onClick={() => handleQuickDemo('pustakawan')}
-                className="p-1.5 rounded-lg border border-emerald-300 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-medium hover:bg-emerald-100 transition-colors text-center text-[11px]"
+                onClick={onOpenOpac}
+                className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline"
               >
-                Pustakawan
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin')}
-                className="p-1.5 rounded-lg border border-blue-300 dark:border-blue-800/60 bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 font-medium hover:bg-blue-100 transition-colors text-center text-[11px]"
-              >
-                Admin Perpus
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('kepala_sekolah')}
-                className="p-1.5 rounded-lg border border-amber-300 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-medium hover:bg-amber-100 transition-colors text-center text-[11px]"
-              >
-                Kepala Sekolah
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('superadmin')}
-                className="p-1.5 rounded-lg border border-purple-300 dark:border-purple-800/60 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 font-medium hover:bg-purple-100 transition-colors text-center text-[11px]"
-              >
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('guru')}
-                className="p-1.5 rounded-lg border border-sky-300 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 font-medium hover:bg-sky-100 transition-colors text-center text-[11px]"
-              >
-                Guru (Anggota)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('siswa')}
-                className="p-1.5 rounded-lg border border-teal-300 dark:border-teal-800/60 bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 font-medium hover:bg-teal-100 transition-colors text-center text-[11px]"
-              >
-                Siswa (Anggota)
+                Cari Buku di Katalog Publik (OPAC) tanpa login →
               </button>
             </div>
-          </div>
+          )}
         </div>
-
-        {/* Public OPAC link */}
-        {onOpenOpac && (
-          <div className="text-center">
-            <button
-              onClick={onOpenOpac}
-              className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline"
-            >
-              Cari Buku di Katalog Publik (OPAC) tanpa login →
-            </button>
-          </div>
-        )}
+      </div>
+      <div className="text-center pb-4 text-[10px] text-slate-500">
+        Widya Pustaka Library System | SMA Negeri 3 Nganjuk | Satu Hati 3 Beraksi Meraih Prestasi | damunSetiadji 2026
       </div>
     </div>
   );

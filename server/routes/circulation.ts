@@ -34,149 +34,83 @@ router.get('/loans', authMiddleware, (req: AuthenticatedRequest, res: Response) 
   return res.json({ total: loans.length, loans });
 });
 
-// POST /api/circulation/borrow - Fast Scan-to-Loan Transaction
+// POST /api/circulation/bulk-loan-import - Bulk Loan Import
 router.post(
-  '/borrow',
+  '/bulk-loan-import',
   authMiddleware,
   requireRoles('superadmin', 'admin', 'pustakawan'),
   (req: AuthenticatedRequest, res: Response) => {
-    db.syncOverdueLoans();
-    const { memberIdOrCode, barcodes, customDurationDays, notes } = req.body;
-
-    if (!memberIdOrCode || !barcodes || !Array.isArray(barcodes) || barcodes.length === 0) {
-      return res.status(400).json({ error: 'Identitas Anggota dan minimal satu Barcode Buku wajib diisi.' });
+    const { loans } = req.body;
+    if (!loans || !Array.isArray(loans)) {
+      return res.status(400).json({ error: 'Data peminjaman tidak valid.' });
     }
 
     const data = db.getData();
-    // 1. Find and validate member
-    const member = data.members.find(
-      (m) =>
-        m.id === memberIdOrCode ||
-        m.memberCode.toLowerCase() === memberIdOrCode.trim().toLowerCase() ||
-        m.identityNumber.toLowerCase() === memberIdOrCode.trim().toLowerCase()
-    );
+    const results = {
+      importedCount: 0,
+      errors: [] as string[]
+    };
 
-    if (!member) {
-      return res.status(404).json({ error: `Anggota dengan identitas "${memberIdOrCode}" tidak ditemukan.` });
-    }
-
-    if (member.status !== 'active') {
-      return res.status(400).json({
-        error: `Transaksi ditolak: Status anggota adalah ${member.status.toUpperCase()} (Tidak Aktif).`
-      });
-    }
-
-    // Check if member has unpaid overdue fines exceeding limit
-    const unpaidFines = data.fines.filter(
-      (f) => f.memberId === member.id && (f.status === 'unpaid' || f.status === 'partial')
-    );
-    const totalUnpaidFine = unpaidFines.reduce((sum, f) => sum + (f.totalFine - f.paidAmount), 0);
-    if (totalUnpaidFine > 20000) {
-      return res.status(400).json({
-        error: `Peminjaman diblokir: Anggota memiliki tunggakan denda sebesar Rp ${totalUnpaidFine.toLocaleString('id-ID')}. Selesaikan denda terlebih dahulu.`
-      });
-    }
-
-    // Check active loan limits
-    const memberTypeKey = member.type.toLowerCase() as 'siswa' | 'guru' | 'tendik';
-    const rule = data.settings.loanRules[memberTypeKey] || { maxItems: 3, loanDurationDays: 7, maxExtensions: 2 };
-
-    const activeLoans = data.loans.filter(
-      (l) => l.memberId === member.id && (l.status === 'active' || l.status === 'overdue')
-    );
-    const currentActiveItemCount = activeLoans.reduce((sum, l) => sum + l.items.length, 0);
-
-    if (currentActiveItemCount + barcodes.length > rule.maxItems) {
-      return res.status(400).json({
-        error: `Batas peminjaman terlampaui. Kuota maksimal untuk ${member.type} adalah ${rule.maxItems} buku. (Saat ini sedang meminjam ${currentActiveItemCount} buku).`
-      });
-    }
-
-    // 2. Validate all item barcodes
-    const loanItems: LoanItem[] = [];
-    const matchedBookItems: any[] = [];
-
-    for (const rawBarcode of barcodes) {
-      const barcode = rawBarcode.trim();
-      const item = data.items.find((i) => i.barcode.toLowerCase() === barcode.toLowerCase());
-
-      if (!item) {
-        return res.status(404).json({ error: `Eksemplar dengan barcode "${barcode}" tidak ditemukan.` });
+    loans.forEach((loan: any, index: number) => {
+      // 1. Validate member
+      const member = data.members.find(
+        (m) => m.memberCode === loan.memberCode || m.identityNumber === loan.memberCode
+      );
+      if (!member || member.status !== 'active') {
+        results.errors.push(`Baris ${index + 1}: Anggota ${loan.memberCode} tidak ditemukan atau tidak aktif.`);
+        return;
       }
 
-      if (item.status !== 'available') {
-        return res.status(400).json({
-          error: `Buku "${item.barcode}" tidak dapat dipinjam karena berstatus: ${item.status.toUpperCase()}.`
-        });
+      // 2. Validate book
+      const item = data.items.find((i) => i.barcode === loan.barcode);
+      if (!item || item.status !== 'available') {
+        results.errors.push(`Baris ${index + 1}: Buku ${loan.barcode} tidak ditemukan atau tidak tersedia.`);
+        return;
       }
 
       const book = data.books.find((b) => b.id === item.bookId);
-      if (!book) {
-        return res.status(404).json({ error: `Data bibliografi untuk barcode "${barcode}" tidak ditemukan.` });
+      if (!book || book.category !== 'Buku Mata Pelajaran') {
+        results.errors.push(`Baris ${index + 1}: Buku ${loan.barcode} bukan merupakan Buku Mata Pelajaran.`);
+        return;
       }
+      
+      // 3. Create Loan Record
+      const newLoan: Loan = {
+        id: 'loan-' + Date.now() + index,
+        loanCode: `PJ-${loan.loanDate.replace(/-/g, '')}-${(data.loans.length + results.importedCount + 1).toString().padStart(4, '0')}`,
+        memberId: member.id,
+        memberCode: member.memberCode,
+        memberName: member.name,
+        memberType: member.type,
+        officerId: req.user!.id,
+        officerName: req.user!.fullName,
+        loanDate: loan.loanDate,
+        dueDate: loan.dueDate,
+        status: 'active',
+        extensionCount: 0,
+        maxExtensions: 2,
+        items: [{
+          itemId: item.id,
+          bookId: book!.id,
+          barcode: item.barcode,
+          bookTitle: book!.title,
+          author: book!.author,
+          callNumber: book!.callNumber,
+          coverUrl: book!.coverUrl
+        }]
+      };
 
-      loanItems.push({
-        itemId: item.id,
-        bookId: book.id,
-        barcode: item.barcode,
-        bookTitle: book.title,
-        author: book.author,
-        callNumber: book.callNumber,
-        coverUrl: book.coverUrl
-      });
-      matchedBookItems.push(item);
-    }
-
-    // 3. Calculate Dates
-    const today = new Date();
-    const loanDate = today.toISOString().split('T')[0];
-    const duration = Number(customDurationDays) || rule.loanDurationDays;
-    const dueTime = new Date(today.getTime() + duration * 24 * 60 * 60 * 1000);
-    const dueDate = dueTime.toISOString().split('T')[0];
-
-    const loanCode = `PJ-${loanDate.replace(/-/g, '').slice(0, 6)}-${(data.loans.length + 1).toString().padStart(4, '0')}`;
-
-    const newLoan: Loan = {
-      id: 'loan-' + Date.now(),
-      loanCode,
-      memberId: member.id,
-      memberCode: member.memberCode,
-      memberName: member.name,
-      memberType: member.type,
-      officerId: req.user!.id,
-      officerName: req.user!.fullName,
-      loanDate,
-      dueDate,
-      status: 'active',
-      extensionCount: 0,
-      maxExtensions: rule.maxExtensions,
-      items: loanItems,
-      notes: notes?.trim()
-    };
-
-    // Update item status in database
-    matchedBookItems.forEach((item) => {
+      // Update item status
       item.status = 'borrowed';
+      data.loans.unshift(newLoan);
+      results.importedCount++;
     });
 
-    data.loans.unshift(newLoan);
     db.saveDatabase();
-
-    db.logActivity({
-      userId: req.user!.id,
-      username: req.user!.username,
-      role: req.user!.role,
-      module: 'LOANS',
-      action: 'BORROW',
-      recordId: newLoan.id,
-      recordIdentifier: newLoan.loanCode,
-      description: `Peminjaman ${loanItems.length} buku kepada ${member.name} (${member.memberCode}) dengan kode ${loanCode}`,
-      ipAddress: req.ip || '127.0.0.1'
-    });
-
-    return res.status(201).json({
-      message: `Peminjaman berhasil dicatat. Jatuh tempo: ${dueDate}`,
-      loan: newLoan
+    return res.json({ 
+      message: `Berhasil mengimpor ${results.importedCount} data peminjaman.`, 
+      importedCount: results.importedCount,
+      errors: results.errors 
     });
   }
 );

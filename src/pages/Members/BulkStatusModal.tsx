@@ -74,13 +74,13 @@ export const BulkStatusModal: React.FC<BulkStatusModalProps> = ({
       return students.filter((m) => {
         const c = (m.classGrade || '').toUpperCase().trim();
         if (selectedGrade === 'XII') {
-          return c.startsWith('XII') || c.includes('KELAS XII') || c.includes('KELAS 12') || c.startsWith('12');
+          return c.includes('KELAS 12') || c.includes('12-') || c.startsWith('XII') || c.startsWith('12');
         }
         if (selectedGrade === 'XI') {
-          return c.startsWith('XI') || c.includes('KELAS XI') || c.includes('KELAS 11') || c.startsWith('11');
+          return c.includes('KELAS 11') || c.includes('11-') || c.startsWith('XI') || c.startsWith('11');
         }
         if (selectedGrade === 'X') {
-          return c.startsWith('X') || c.includes('KELAS X') || c.includes('KELAS 10') || c.startsWith('10');
+          return c.includes('KELAS 10') || c.includes('10-') || c.startsWith('X') || c.startsWith('10');
         }
         return true;
       });
@@ -422,10 +422,10 @@ export const BulkStatusModal: React.FC<BulkStatusModalProps> = ({
                 <div>
                   <div className="font-bold text-xs flex items-center gap-1.5">
                     <UserX className="w-3.5 h-3.5 text-rose-600" />
-                    Nonaktif Umum
+                    Mutasi / Nonaktif
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
-                    Penonaktifan massal untuk audit / administrasi
+                    Penonaktifan massal untuk mutasi / administrasi
                   </div>
                 </div>
               </label>

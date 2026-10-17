@@ -1,0 +1,362 @@
+{
+  "settings": {
+    "libraryName": "WIDYA PUSTAKA LIBRARY SYSTEM",
+    "shortName": "WIDYA PUSTAKA",
+    "schoolName": "SMA NEGERI 3 NGANJUK",
+    "address": "Jl. Bengawan Solo 109 Begadung",
+    "city": "Nganjuk",
+    "postalCode": "64413",
+    "province": "Jawa Timur",
+    "phone": "(0358) 321855",
+    "email": "perpustakaan@sman3nganjuk.sch.id",
+    "website": "https://sman3nganjuk.sch.id",
+    "tagline": "Membaca, Mengelola, Menginspirasi",
+    "headOfLibrary": "Dra. Endang Sulistyowati, M.Pd.",
+    "headmaster": "Drs. H. Sukadi, M.Pd.",
+    "finePerDay": 1000,
+    "gracePeriodDays": 1,
+    "fineDamagedPercent": 50,
+    "fineLostMultiplier": 100,
+    "loanRules": {
+      "siswa": {
+        "maxItems": 3,
+        "loanDurationDays": 7,
+        "maxExtensions": 2
+      },
+      "guru": {
+        "maxItems": 5,
+        "loanDurationDays": 14,
+        "maxExtensions": 3
+      },
+      "tendik": {
+        "maxItems": 5,
+        "loanDurationDays": 14,
+        "maxExtensions": 3
+      }
+    },
+    "enableSelfReservation": true,
+    "enableAiAssistant": true,
+    "themeColor": "#1E3A8A",
+    "googleSpreadsheetUrl": "https://docs.google.com/spreadsheets/d/1VlKdmIhyMOIQtdgGu5SebRy4wP216THGt9dMPuQfyOA/edit?usp=sharing",
+    "googleSpreadsheetId": "1VlKdmIhyMOIQtdgGu5SebRy4wP216THGt9dMPuQfyOA",
+    "googleDriveFolderUrl": "https://drive.google.com/drive/folders/1KpUK7yn2CZeTQGKAjdvQWdC662dkOna3?usp=sharing",
+    "googleDriveFolderId": "1KpUK7yn2CZeTQGKAjdvQWdC662dkOna3",
+    "gasWebAppUrl": "",
+    "enableGoogleSheetsSync": true,
+    "autoSyncIntervalMinutes": 5
+  },
+  "users": [
+    {
+      "id": "usr-superadmin",
+      "username": "superadmin",
+      "email": "superadmin@sman3nganjuk.sch.id",
+      "fullName": "Super Administrator",
+      "role": "superadmin",
+      "passwordHash": "$2b$10$7RT3nBBr7vfCqC8ceHKj9.9PoFSF9esSvHmzvU8u8MrTLzKWNCcce",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "isActive": true,
+      "createdAt": "2025-01-01T08:00:00Z",
+      "lastLogin": "2026-08-27T04:29:27.574Z"
+    },
+    {
+      "id": "usr-admin",
+      "username": "admin",
+      "email": "admin.perpus@sman3nganjuk.sch.id",
+      "fullName": "Admin WPLS",
+      "role": "admin",
+      "passwordHash": "$2b$10$bKM42dGK5lC4gQ7jGQfjx.VN2uaLLhb.V6mEOmLGn01.dQy0wvWCS",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "isActive": true,
+      "createdAt": "2025-01-02T08:00:00Z",
+      "name": "Admin WPLS"
+    },
+    {
+      "id": "usr-pustakawan",
+      "username": "pustakawan",
+      "email": "pustakawan@sman3nganjuk.sch.id",
+      "fullName": "KHOLISATUN N",
+      "role": "pustakawan",
+      "passwordHash": "$2b$10$S4aHP.f80kUcOAkUJ2SvdegQmy72Z73pxunRNkDNEJA6cjqij25i.",
+      "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "isActive": true,
+      "createdAt": "2025-01-03T08:00:00Z",
+      "name": "KHOLISATUN N"
+    },
+    {
+      "id": "usr-kepsek",
+      "username": "kepsek",
+      "email": "kepsek@sman3nganjuk.sch.id",
+      "fullName": "Pujianto, S.Pd., S.Sos, M.E.",
+      "role": "kepala_sekolah",
+      "passwordHash": "$2b$10$9v.l0kPrendAOnFSqqWyPe9h./3Fmyt31UnCc11x9MBnUV/UyaNVy",
+      "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+      "isActive": true,
+      "createdAt": "2025-01-01T08:00:00Z",
+      "name": "Pujianto, S.Pd., S.Sos, M.E."
+    }
+  ],
+  "books": [],
+  "items": [],
+  "members": [],
+  "loans": [],
+  "fines": [],
+  "reservations": [],
+  "stockOpnames": [],
+  "serials": [],
+  "categories": [
+    {
+      "id": "cat-1",
+      "code": "000",
+      "name": "Karya Umum & Komputer",
+      "ddcRange": "000 - 099"
+    },
+    {
+      "id": "cat-2",
+      "code": "100",
+      "name": "Filsafat & Psikologi",
+      "ddcRange": "100 - 199"
+    },
+    {
+      "id": "cat-3",
+      "code": "200",
+      "name": "Agama",
+      "ddcRange": "200 - 299"
+    },
+    {
+      "id": "cat-4",
+      "code": "300",
+      "name": "Ilmu Sosial & Pendidikan",
+      "ddcRange": "300 - 399"
+    },
+    {
+      "id": "cat-5",
+      "code": "400",
+      "name": "Bahasa & Linguistik",
+      "ddcRange": "400 - 499"
+    },
+    {
+      "id": "cat-6",
+      "code": "500",
+      "name": "Sains & Matematika",
+      "ddcRange": "500 - 599"
+    },
+    {
+      "id": "cat-7",
+      "code": "600",
+      "name": "Teknologi & Ilmu Terapan",
+      "ddcRange": "600 - 699"
+    },
+    {
+      "id": "cat-8",
+      "code": "700",
+      "name": "Seni, Musik & Olahraga",
+      "ddcRange": "700 - 799"
+    },
+    {
+      "id": "cat-9",
+      "code": "800",
+      "name": "Kesusastraan & Fiksi",
+      "ddcRange": "800 - 899"
+    },
+    {
+      "id": "cat-10",
+      "code": "900",
+      "name": "Sejarah & Geografi",
+      "ddcRange": "900 - 999"
+    },
+    {
+      "id": "cat-11",
+      "code": "TEX",
+      "name": "Buku Teks Pelajaran",
+      "ddcRange": "Pelajaran SMA"
+    },
+    {
+      "id": "cat-12",
+      "code": "REF",
+      "name": "Referensi & Ensiklopedia",
+      "ddcRange": "R"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc-1",
+      "code": "RAK-A1",
+      "name": "Rak A1 - Sains & MIPA",
+      "room": "Ruang Koleksi Utama",
+      "shelf": "Lantai 1, Baris 1",
+      "capacity": 150
+    },
+    {
+      "id": "loc-2",
+      "code": "RAK-A2",
+      "name": "Rak A2 - Teknologi & Terapan",
+      "room": "Ruang Koleksi Utama",
+      "shelf": "Lantai 1, Baris 2",
+      "capacity": 150
+    },
+    {
+      "id": "loc-3",
+      "code": "RAK-B1",
+      "name": "Rak B1 - Sastra & Fiksi",
+      "room": "Ruang Koleksi Utama",
+      "shelf": "Lantai 1, Baris 3",
+      "capacity": 200
+    },
+    {
+      "id": "loc-4",
+      "code": "RAK-B2",
+      "name": "Rak B2 - Novel & Antologi",
+      "room": "Ruang Baca Santai",
+      "shelf": "Lantai 1, Baris 4",
+      "capacity": 200
+    },
+    {
+      "id": "loc-5",
+      "code": "RAK-C1",
+      "name": "Rak C1 - Pelajaran Kelas X",
+      "room": "Ruang Buku Teks",
+      "shelf": "Lantai 2, Baris 1",
+      "capacity": 300
+    },
+    {
+      "id": "loc-6",
+      "code": "RAK-C2",
+      "name": "Rak C2 - Pelajaran Kelas XI",
+      "room": "Ruang Buku Teks",
+      "shelf": "Lantai 2, Baris 2",
+      "capacity": 300
+    },
+    {
+      "id": "loc-7",
+      "code": "RAK-C3",
+      "name": "Rak C3 - Pelajaran Kelas XII",
+      "room": "Ruang Buku Teks",
+      "shelf": "Lantai 2, Baris 3",
+      "capacity": 300
+    },
+    {
+      "id": "loc-8",
+      "code": "RAK-R1",
+      "name": "Rak R1 - Referensi & Kamus",
+      "room": "Ruang Referensi",
+      "shelf": "Lantai 1, Sudut R",
+      "capacity": 100
+    },
+    {
+      "id": "loc-9",
+      "code": "RAK-D1",
+      "name": "Rak D1 - Karya Ilmiah & Majalah",
+      "room": "Ruang Berkala",
+      "shelf": "Lantai 1, Sisi Timur",
+      "capacity": 120
+    }
+  ],
+  "publishers": [
+    {
+      "id": "pub-1",
+      "name": "Pusat Perbukuan Kemendikbudristek",
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "phone": "(021) 3804248",
+      "email": "buku@kemdikbud.go.id"
+    },
+    {
+      "id": "pub-2",
+      "name": "Erlangga",
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "phone": "(021) 8717085",
+      "email": "customercare@erlangga.co.id"
+    },
+    {
+      "id": "pub-3",
+      "name": "Gramedia Pustaka Utama",
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "phone": "(021) 53650110",
+      "email": "customercare@gramedia.com"
+    },
+    {
+      "id": "pub-4",
+      "name": "Bentang Pustaka",
+      "city": "Yogyakarta",
+      "country": "Indonesia",
+      "phone": "(0274) 885408",
+      "email": "bentang.pustaka@mizan.com"
+    },
+    {
+      "id": "pub-5",
+      "name": "Mizan",
+      "city": "Bandung",
+      "country": "Indonesia",
+      "phone": "(022) 7834310",
+      "email": "redaksi@mizan.com"
+    },
+    {
+      "id": "pub-6",
+      "name": "Balai Pustaka",
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "phone": "(021) 8583377",
+      "email": "info@balaipustaka.co.id"
+    }
+  ],
+  "authors": [
+    {
+      "id": "aut-1",
+      "name": "Pramoedya Ananta Toer",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-2",
+      "name": "Andrea Hirata",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-3",
+      "name": "Tere Liye",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-4",
+      "name": "Ahmad Fuadi",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-5",
+      "name": "Eka Kurniawan",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-6",
+      "name": "Tim Kemendikbud",
+      "type": "Organisasi",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-7",
+      "name": "Marthen Kanginan",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-8",
+      "name": "Sukino",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    },
+    {
+      "id": "aut-9",
+      "name": "Siti Nurul Hidayah",
+      "type": "Personal",
+      "nationality": "Indonesia"
+    }
+  ],
+  "activityLogs": [],
+  "backups": []
+}

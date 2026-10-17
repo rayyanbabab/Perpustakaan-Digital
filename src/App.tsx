@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
+import { Footer } from './components/layout/Footer';
 
 // Pages
 import { Login } from './pages/Login';
@@ -149,6 +150,7 @@ const MainApp: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+      <Footer />
     </div>
   );
 };

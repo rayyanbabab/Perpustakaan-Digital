@@ -25,6 +25,15 @@ export interface ParsedBookRow {
   _errors?: string[];
 }
 
+export interface ParsedLoanRow {
+  memberCode: string; // NIS/NIP
+  barcode: string;
+  loanDate: string; // YYYY-MM-DD
+  dueDate: string; // YYYY-MM-DD
+  _isValid?: boolean;
+  _errors?: string[];
+}
+
 /**
  * Interface for parsed Member row from Excel or CSV
  */
@@ -249,6 +258,44 @@ export async function downloadBookImportExcelTemplate(): Promise<void> {
 }
 
 /**
+ * Download stylized Excel (.xlsx) Template for Loan Bulk Import
+ */
+export async function downloadLoanImportExcelTemplate(): Promise<void> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Widya Pustaka SMAN 3 Nganjuk';
+  workbook.created = new Date();
+
+  const sheet = workbook.addWorksheet('Template Impor Peminjaman');
+
+  sheet.columns = [
+    { header: 'NIS / NIP *', key: 'memberCode', width: 25 },
+    { header: 'Barcode Buku *', key: 'barcode', width: 20 },
+    { header: 'Tanggal Pinjam (YYYY-MM-DD) *', key: 'loanDate', width: 30 },
+    { header: 'Tanggal Kembali (YYYY-MM-DD) *', key: 'dueDate', width: 30 }
+  ];
+
+  // Style Header
+  const headerRow = sheet.getRow(1);
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+
+  // Add example data
+  sheet.addRow({ 
+    memberCode: '202410106', 
+    barcode: 'WPL-000001', 
+    loanDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  triggerExcelDownload(buffer, 'template_impor_peminjaman_masal.xlsx');
+}
+
+
+/**
  * Download stylized Excel (.xlsx) Template for Member Bulk Import
  */
 export async function downloadMemberImportExcelTemplate(): Promise<void> {
@@ -432,6 +479,112 @@ export async function downloadMemberImportExcelTemplate(): Promise<void> {
 
   const buffer = await workbook.xlsx.writeBuffer();
   triggerExcelDownload(buffer, `template_import_anggota_sman3nganjuk.xlsx`);
+}
+
+/**
+ * Universal Excel / CSV Reader for Loans
+ */
+export async function parseLoanFile(file: File): Promise<{
+  rows: ParsedLoanRow[];
+  totalValid: number;
+  totalInvalid: number;
+}> {
+  let rawRows: any[] = [];
+
+  if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+    const buffer = await file.arrayBuffer();
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
+    const worksheet = workbook.worksheets[0];
+
+    const headers: string[] = [];
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) {
+        row.eachCell((cell) => {
+          headers.push(String(cell.text || cell.value || '').trim());
+        });
+      } else {
+        const rowObj: Record<string, any> = {};
+        row.eachCell((cell, colNumber) => {
+          const header = headers[colNumber - 1] || `col_${colNumber}`;
+          let val = cell.value;
+          if (val && typeof val === 'object' && 'text' in val) {
+            val = (val as any).text;
+          } else if (val && typeof val === 'object' && 'result' in val) {
+            val = (val as any).result;
+          }
+          rowObj[header] = val !== null && val !== undefined ? String(val).trim() : '';
+        });
+        if (Object.keys(rowObj).length > 0) {
+          rawRows.push(rowObj);
+        }
+      }
+    });
+  } else {
+    // CSV / TXT fallback
+    const text = await file.text();
+    rawRows = parseDelimitedText(text);
+  }
+
+  return normalizeLoanRows(rawRows);
+}
+
+/**
+ * Intelligent normalization of raw Loan rows
+ */
+export function normalizeLoanRows(rawRows: any[]): {
+  rows: ParsedLoanRow[];
+  totalValid: number;
+  totalInvalid: number;
+} {
+  let validCount = 0;
+  let invalidCount = 0;
+
+  const normalized: ParsedLoanRow[] = rawRows.map((raw, idx) => {
+    const errors: string[] = [];
+
+    const getVal = (aliases: string[]) => {
+      for (const key of Object.keys(raw)) {
+        const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (const alias of aliases) {
+          const cleanAlias = alias.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (cleanKey.includes(cleanAlias) || cleanAlias.includes(cleanKey)) {
+            return String(raw[key] ?? '').trim();
+          }
+        }
+      }
+      return '';
+    };
+
+    const memberCode = getVal(['nis', 'nip', 'membercode', 'anggota']);
+    const barcode = getVal(['barcode', 'buku']);
+    const loanDate = getVal(['tanggalpinjam', 'loandate', 'tglpinjam']);
+    const dueDate = getVal(['tanggalkembali', 'duedate', 'tglkembali']);
+
+    if (!memberCode) errors.push('NIS/NIP tidak boleh kosong.');
+    if (!barcode) errors.push('Barcode tidak boleh kosong.');
+    if (!loanDate) errors.push('Tanggal Pinjam tidak boleh kosong.');
+    if (!dueDate) errors.push('Tanggal Kembali tidak boleh kosong.');
+
+    const isValid = errors.length === 0;
+    if (isValid) validCount++;
+    else invalidCount++;
+
+    return {
+      memberCode,
+      barcode,
+      loanDate,
+      dueDate,
+      _isValid: isValid,
+      _errors: errors
+    };
+  });
+
+  return {
+    rows: normalized,
+    totalValid: validCount,
+    totalInvalid: invalidCount
+  };
 }
 
 /**

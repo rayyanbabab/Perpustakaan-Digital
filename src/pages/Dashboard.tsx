@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db, collection, onSnapshot, query, where } from '../lib/firebase';
+import { handleFirestoreError, OperationType } from '../lib/firebaseError';
 import {
   BookOpen,
   Users,
@@ -77,16 +78,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, setCurrentTab 
     const visitorsQuery = query(collection(db, 'visitors'), where('date', '==', today));
     const unsubscribeVisitors = onSnapshot(visitorsQuery, (snapshot) => {
       setRealtimeStats(prev => ({ ...prev, visitorsToday: snapshot.size }));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'visitors');
     });
 
     const loansQuery = query(collection(db, 'loans'), where('status', 'in', ['active', 'overdue']));
     const unsubscribeLoans = onSnapshot(loansQuery, (snapshot) => {
       setRealtimeStats(prev => ({ ...prev, activeLoans: snapshot.size }));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'loans');
     });
 
     const finesQuery = query(collection(db, 'fines'), where('status', 'in', ['unpaid', 'partial']));
     const unsubscribeFines = onSnapshot(finesQuery, (snapshot) => {
       setRealtimeStats(prev => ({ ...prev, unpaidFines: snapshot.size }));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'fines');
     });
 
     return () => {

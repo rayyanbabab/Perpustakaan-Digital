@@ -35,9 +35,15 @@ import { BulkStatusModal } from './BulkStatusModal';
 function getGradeFromClassName(classGrade?: string): 'X' | 'XI' | 'XII' | 'OTHER' {
   if (!classGrade) return 'OTHER';
   const c = classGrade.toUpperCase().trim();
-  if (c.startsWith('XII') || c.includes('KELAS XII') || c.includes('KELAS 12') || c.startsWith('12')) return 'XII';
-  if (c.startsWith('XI') || c.includes('KELAS XI') || c.includes('KELAS 11') || c.startsWith('11')) return 'XI';
-  if (c.startsWith('X') || c.includes('KELAS X') || c.includes('KELAS 10') || c.startsWith('10')) return 'X';
+  // New format: "Kelas 10-A", "Kelas 11-A", "Kelas 12-A"
+  if (c.includes('KELAS 12') || c.includes('12-')) return 'XII';
+  if (c.includes('KELAS 11') || c.includes('11-')) return 'XI';
+  if (c.includes('KELAS 10') || c.includes('10-')) return 'X';
+  
+  // Legacy support
+  if (c.startsWith('XII') || c.startsWith('12')) return 'XII';
+  if (c.startsWith('XI') || c.startsWith('11')) return 'XI';
+  if (c.startsWith('X') || c.startsWith('10')) return 'X';
   return 'OTHER';
 }
 
@@ -156,7 +162,7 @@ export const MemberList: React.FC = () => {
       email: '',
       phone: '081234567890',
       gender: 'L',
-      classGrade: 'X-E 1',
+      classGrade: 'Kelas 10-A',
       subject: '',
       position: '',
       photoUrl: '',
@@ -267,7 +273,7 @@ export const MemberList: React.FC = () => {
       label = 'Mutasi Keluar';
       bgClass = 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300/40';
     } else if (status === 'inactive') {
-      label = 'Nonaktif';
+      label = 'Mutasi';
       bgClass = 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-300/40';
     } else if (status === 'suspended') {
       label = 'Ditangguhkan';
@@ -439,8 +445,8 @@ export const MemberList: React.FC = () => {
               <option value="all">Semua Status</option>
               <option value="active">Aktif</option>
               <option value="graduated">Lulus (Alumni)</option>
-              <option value="transferred">Mutasi Keluar</option>
-              <option value="inactive">Nonaktif Umum</option>
+              <option value="transferred">Mutasi Keluar (Siswa)</option>
+              <option value="inactive">Mutasi</option>
             </select>
           </div>
 
@@ -737,7 +743,7 @@ export const MemberList: React.FC = () => {
                       type="text"
                       value={formData.classGrade}
                       onChange={(e) => setFormData({ ...formData, classGrade: e.target.value })}
-                      placeholder="Contoh: X-E 1 / XI F-4 / XII MIPA 2"
+                      placeholder="Contoh: Kelas 10-A / Kelas 11-B / Kelas 12-C"
                       className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold"
                     />
                   </div>
@@ -752,8 +758,8 @@ export const MemberList: React.FC = () => {
                     >
                       <option value="active">Aktif (Siswa Aktif / Mutasi Masuk)</option>
                       <option value="graduated">Lulus / Alumni (Nonaktif)</option>
-                      <option value="transferred">Mutasi Keluar (Nonaktif)</option>
-                      <option value="inactive">Nonaktif Umum</option>
+                      <option value="transferred">Mutasi Keluar (Siswa)</option>
+                      <option value="inactive">Mutasi</option>
                     </select>
                   </div>
                 </div>
@@ -781,7 +787,7 @@ export const MemberList: React.FC = () => {
                       className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold"
                     >
                       <option value="active">Aktif</option>
-                      <option value="inactive">Nonaktif</option>
+                      <option value="inactive">Mutasi</option>
                     </select>
                   </div>
                 </div>

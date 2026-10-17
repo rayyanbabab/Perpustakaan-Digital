@@ -1,0 +1,34 @@
+{
+  "entities": {
+    "visitor": {
+      "title": "Visitor",
+      "description": "Library visitor record",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "memberId": { "type": "string" }
+      }
+    },
+    "loan": {
+      "title": "Loan",
+      "description": "Library loan record",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" }
+      }
+    },
+    "fine": {
+      "title": "Fine",
+      "description": "Library fine record",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/visitors/{visitorId}": { "schema": "visitor", "description": "Visitors" },
+    "/loans/{loanId}": { "schema": "loan", "description": "Loans" },
+    "/fines/{fineId}": { "schema": "fine", "description": "Fines" }
+  }
+}
